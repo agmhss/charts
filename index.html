@@ -24,7 +24,8 @@
     .section { padding: 24px; border-bottom: 1px solid #eee; }
     .section-title { margin: 0 0 16px; font-size: 1.25rem; font-weight: 600; color: #1e40af; }
     label { font-weight: 600; display: block; margin-bottom: 8px; color: #444; }
-    input[type=text], input[type=password] { width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
+    input[type=text], input[type=password] { width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .form-group { margin-bottom: 20px; }
     .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 20px; margin-top: 8px; }
     .preview-area { min-height: 400px; background: #f9fafb; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; margin: 16px 0; position: relative; overflow: auto; }
     #mermaid-container, #d3-container { min-width: 100%; text-align: center; }
@@ -32,7 +33,7 @@
     .loader { border: 5px solid #e5e7eb; border-top: 5px solid #3b82f6; border-radius: 50%; width: 42px; height: 42px; animation: spin 1s linear infinite; margin: 100px auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
-    button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: background 0.2s; }
     .primary { background: #2563eb; color: white; }
     .primary:hover { background: #1d4ed8; }
     .success { background: #16a34a; color: white; }
@@ -40,9 +41,13 @@
     .secondary { background: #6b7280; color: white; }
     .secondary:hover { background: #4b5563; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .code-editor { width: 100%; height: 200px; font-family: 'Consolas', monospace; font-size: 14px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; background: #f8fafc; margin: 12px 0; }
+    .code-editor { width: 100%; height: 200px; font-family: 'Consolas', monospace; font-size: 14px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; background: #f8fafc; margin: 12px 0; box-sizing: border-box; }
     .lang-tamil body, .lang-tamil label, .lang-tamil .section-title, .lang-tamil button { font-family: var(--font-tamil); }
+    .lang-tamil input::placeholder { font-family: var(--font-tamil); }
     #d3-container svg { max-width: 100%; height: auto; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background 0.2s; }
+    .radio-label:hover { background: #f0f9ff; }
+    .radio-label input[type="radio"] { margin: 0; width: auto; }
   </style>
 </head>
 <body class="lang-english">
@@ -69,15 +74,15 @@
     <div class="form-group">
       <label id="typeLabel" data-en="Diagram Type" data-ta="வரைபட வகை">Diagram Type</label>
       <div class="chart-grid">
-        <label><input type="radio" name="chartType" value="flowchart" checked> <span data-en="Flowchart / Process" data-ta="பாய்வு வரைபடம் / செயல்முறை">Flowchart / Process</span></label>
-        <label><input type="radio" name="chartType" value="mindmap"> <span data-en="Mind Map" data-ta="மன வரைபடம்">Mind Map</span></label>
-        <label><input type="radio" name="chartType" value="sequenceDiagram"> <span data-en="Sequence Diagram" data-ta="தொடர் வரைபடம்">Sequence Diagram</span></label>
-        <label><input type="radio" name="chartType" value="classDiagram"> <span data-en="Class / Entity Diagram" data-ta="வகுப்பு / பொருள் வரைபடம்">Class / Entity Diagram</span></label>
-        <label><input type="radio" name="chartType" value="timeline"> <span data-en="Timeline" data-ta="காலவரிசை">Timeline</span></label>
-        <label><input type="radio" name="chartType" value="pie"> <span data-en="Pie Chart" data-ta="வட்ட வரைபடம்">Pie Chart</span></label>
-        <label><input type="radio" name="chartType" value="infographic"> <span data-en="Infographic" data-ta="தகவல் வரைபடம்">Infographic</span></label>
-        <label><input type="radio" name="chartType" value="pictograph"> <span data-en="Pictograph" data-ta="படக்குறியீட்டு வரைபடம்">Pictograph</span></label>
-        <label><input type="radio" name="chartType" value="explodedview"> <span data-en="Exploded View" data-ta="விரிந்த பார்வை">Exploded View</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="flowchart" checked> <span data-en="Flowchart / Process" data-ta="பாய்வு வரைபடம் / செயல்முறை">Flowchart / Process</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="mindmap"> <span data-en="Mind Map" data-ta="மன வரைபடம்">Mind Map</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="sequenceDiagram"> <span data-en="Sequence Diagram" data-ta="தொடர் வரைபடம்">Sequence Diagram</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="classDiagram"> <span data-en="Class / Entity Diagram" data-ta="வகுப்பு / பொருள் வரைபடம்">Class / Entity Diagram</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="timeline"> <span data-en="Timeline" data-ta="காலவரிசை">Timeline</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="pie"> <span data-en="Pie Chart" data-ta="வட்ட வரைபடம்">Pie Chart</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="infographic"> <span data-en="Infographic" data-ta="தகவல் வரைபடம்">Infographic</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="pictograph"> <span data-en="Pictograph" data-ta="படக்குறியீட்டு வரைபடம்">Pictograph</span></label>
+        <label class="radio-label"><input type="radio" name="chartType" value="explodedview"> <span data-en="Exploded View" data-ta="விரிந்த பார்வை">Exploded View</span></label>
       </div>
     </div>
 
@@ -105,8 +110,8 @@
     <div class="section-title" id="sec3Title" data-en="3. Export" data-ta="3. பதிவிறக்கு">3. Export</div>
 
     <div style="display:flex; gap:28px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
-      <label><input type="radio" name="exportFormat" value="png" checked> <span data-en="PNG Image" data-ta="PNG படம்">PNG Image</span></label>
-      <label><input type="radio" name="exportFormat" value="pdf"> <span data-en="PDF (A4)" data-ta="PDF (A4)">PDF (A4)</span></label>
+      <label class="radio-label"><input type="radio" name="exportFormat" value="png" checked> <span data-en="PNG Image" data-ta="PNG படம்">PNG Image</span></label>
+      <label class="radio-label"><input type="radio" name="exportFormat" value="pdf"> <span data-en="PDF (A4)" data-ta="PDF (A4)">PDF (A4)</span></label>
     </div>
 
     <div class="controls">
@@ -116,57 +121,53 @@
 </div>
 
 <script>
-// Language toggle - improved safe version
+// Language toggle
 const langToggle = document.getElementById('langToggle');
 let currentLang = 'en';
 
 function updateLanguage() {
   currentLang = currentLang === 'en' ? 'ta' : 'en';
-  document.body.className = currentLang === 'en' ? 'lang-english' : 'lang-tamil';
+  document.body.className = `lang-${currentLang === 'en' ? 'english' : 'tamil'}`;
   langToggle.textContent = currentLang === 'en' ? 'தமிழ்' : 'English';
 
   const elementsToTranslate = [
-    { id: 'headerTitle', attr: 'text' },
-    { id: 'sec1Title', attr: 'text' },
-    { id: 'apiLabel', attr: 'text' },
-    { id: 'topicLabel', attr: 'text' },
-    { id: 'typeLabel', attr: 'text' },
-    { id: 'sec2Title', attr: 'text' },
-    { id: 'sec3Title', attr: 'text' },
-    { id: 'generateBtn', attr: 'text' },
-    { id: 'renderEditedBtn', attr: 'text' },
-    { id: 'enlargeBtn', attr: 'text' },
-    { id: 'downloadBtn', attr: 'text' }
+    { id: 'headerTitle', attr: 'textContent' },
+    { id: 'sec1Title', attr: 'textContent' },
+    { id: 'apiLabel', attr: 'textContent' },
+    { id: 'topicLabel', attr: 'textContent' },
+    { id: 'typeLabel', attr: 'textContent' },
+    { id: 'sec2Title', attr: 'textContent' },
+    { id: 'sec3Title', attr: 'textContent' },
+    { id: 'generateBtn', attr: 'textContent' },
+    { id: 'renderEditedBtn', attr: 'textContent' },
+    { id: 'enlargeBtn', attr: 'textContent' },
+    { id: 'downloadBtn', attr: 'textContent' }
   ];
 
-  elementsToTranslate.forEach(item => {
-    const el = document.getElementById(item.id);
+  elementsToTranslate.forEach(({id, attr}) => {
+    const el = document.getElementById(id);
     if (el) {
       const key = currentLang === 'en' ? 'data-en' : 'data-ta';
-      if (el.hasAttribute(key)) {
-        el.textContent = el.getAttribute(key);
-      }
+      if (el.hasAttribute(key)) el[attr] = el.getAttribute(key);
     }
   });
 
-  // Placeholder for topic input
+  // Update placeholder
   const topicInput = document.getElementById('contentInput');
-  if (topicInput) {
-    const phKey = currentLang === 'en' ? 'data-en-placeholder' : 'data-ta-placeholder';
-    if (topicInput.hasAttribute(phKey)) {
-      topicInput.placeholder = topicInput.getAttribute(phKey);
-    }
+  const phKey = currentLang === 'en' ? 'data-en-placeholder' : 'data-ta-placeholder';
+  if (topicInput && topicInput.hasAttribute(phKey)) {
+    topicInput.placeholder = topicInput.getAttribute(phKey);
   }
+
+  // Update radio labels
+  document.querySelectorAll('.radio-label span[data-en]').forEach(span => {
+    span.textContent = span.getAttribute(currentLang === 'en' ? 'data-en' : 'data-ta');
+  });
 }
 
 langToggle.addEventListener('click', updateLanguage);
 
-// Run once on load
-updateLanguage();
-
-// ────────────────────────────────────────────────
-// Mermaid + D3 logic
-// ────────────────────────────────────────────────
+// Initialize Mermaid
 mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
@@ -175,6 +176,7 @@ mermaid.initialize({
   sequence: { useMaxWidth: false }
 });
 
+// Elements
 const els = {
   groqKey: document.getElementById('groqKey'),
   topic: document.getElementById('contentInput'),
@@ -188,6 +190,7 @@ const els = {
   renderEditedBtn: document.getElementById('renderEditedBtn')
 };
 
+// Load saved API key
 if (localStorage.getItem('groqApiKey')) {
   els.groqKey.value = localStorage.getItem('groqApiKey');
 }
@@ -215,56 +218,35 @@ els.generateBtn.addEventListener('click', async () => {
   els.mermaidDiv.style.display = 'none';
   els.d3Div.innerHTML = '';
   els.codeEditor.value = '';
-  els.codeEditor.placeholder = currentLang === 'en' 
-    ? "Mermaid code appears here... (for standard types)" 
-    : "Mermaid குறியீடு இங்கு தோன்றும்... (பொதுவான வகைகளுக்கு மட்டும்)";
 
   const isD3 = ['infographic', 'pictograph', 'explodedview'].includes(rawType);
 
   if (isD3) {
     await generateD3Diagram(topic, rawType, currentLang);
   } else {
-    // Mermaid generation
+    // Mermaid generation via Groq
     let typeInstruction = rawType;
-    if (rawType === 'flowchart') typeInstruction = 'flowchart LR or TD';
-     let typeInstruction = rawType;
-    if (rawType === 'infographics') typeInstruction = 'infographics LR or TD';
+    if (rawType === 'flowchart') typeInstruction = 'flowchart TD';
+    if (rawType === 'classDiagram') typeInstruction = 'classDiagram';
 
     const langInstruction = currentLang === 'ta'
-      ? "All labels MUST be in தமிழ் மொழி. Use relevant emoji icons (e.g. 👁️, 📊) to make it visual."
+      ? "எல்லா லேபல்களும் தமிழில் இருக்க வேண்டும். பொருத்தமான emoji பயன்படுத்தவும் (எ.கா. 👁️, 📊)."
       : "All labels MUST be in English. Use relevant emoji icons (e.g. 👁️, 📊) to make it visual.";
 
-    const prompt = `You are an expert educational diagram creator. Create an infographic image of [OBJECT], combining a realistic photograph or photoreal render of the object with technical annotation overlays placed directly on top.
-Use black ink-style line drawings and text (technical pen / architectural sketch look) on a pure white studio background, including:
-• Key component labels
-•Internal cutaway or exploded-view outlines
-•Measurements, dimensions, and scale markers
-•Material callouts and quantities
-•Arrows indicating function, force, or flow (air, sound, power, pressure)
-•Simple schematic or sectional diagrams where relevant
-Place the title [OBJECT] inside a hand-drawn technical annotation box in one corner.
-Style & layout rules:
-•The real object remains clearly visible beneath the annotations
-•Annotations feel sketched, technical, and architectural
-•Clean composition with balanced negative space
-•Educational, museum-exhibit / engineering-manual vibe
-Visual style: Minimal technical illustration aesthetic, black linework over realistic imagery, precise but slightly hand-drawn feel.
-Color palette: White background, black annotation lines and text only. No colors.
-Output: 1080x1080, ultra-crisp, social-feed optimized, no watermark.”
-Create ONLY valid Mermaid code – nothing else.
-Start directly with diagram keyword.
-Topic: "${topic}"
-Diagram style: ${typeInstruction}
+    const prompt = `Create ONLY valid Mermaid ${typeInstruction} code for educational diagram about "${topic}". 
 ${langInstruction}
-Make it detailed, educational, beautiful. Use emoji for visual enhancement.`.trim();
+Make it detailed, beautiful, educational. Use subgraphs, colors, icons. Start directly with diagram keyword.`;
 
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${key}`, 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [{role:"user", content:prompt}],
+          model: "llama3-70b-8192", // Fixed model name
+          messages: [{role: "user", content: prompt}],
           temperature: 0.2,
           max_tokens: 2200
         })
@@ -289,10 +271,11 @@ Make it detailed, educational, beautiful. Use emoji for visual enhancement.`.tri
   els.downloadBtn.disabled = false;
 });
 
-// Render Mermaid
+// Render Mermaid (fixed for multiple renders)
 async function renderMermaid(code) {
   if (!code.trim()) return;
   try {
+    els.mermaidDiv.innerHTML = ''; // Clear previous
     const id = 'mermaid-' + Date.now();
     const { svg } = await mermaid.render(id, code);
     els.mermaidDiv.innerHTML = svg;
@@ -301,31 +284,31 @@ async function renderMermaid(code) {
   }
 }
 
-// D3 diagram generation
+// D3 diagram generation - FIXED for v7 drag events
 async function generateD3Diagram(topic, type, lang) {
   els.d3Div.innerHTML = '';
 
   const width = 800;
   const height = 500;
+  const tamilFont = lang === 'ta' ? "'Noto Sans Tamil', sans-serif" : "Roboto, sans-serif";
 
   const svg = d3.select(els.d3Div)
     .append("svg")
     .attr("width", "100%")
     .attr("height", height)
     .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("style", "max-width:100%; height:auto; font-family: " + (lang==='ta' ? "'Noto Sans Tamil', sans-serif" : "Roboto, sans-serif") + ";");
+    .attr("style", `max-width:100%; height:auto; font-family: ${tamilFont};`);
 
   let nodes = [];
   let links = [];
 
   if (type === 'pictograph') {
-    const quantity = 12; // example - can be dynamic later
+    const quantity = 12;
     const icon = lang === 'ta' ? '👨‍🎓' : '👤';
     const label = lang === 'ta' ? `${quantity} மாணவர்கள்` : `${quantity} Students`;
     
     nodes = Array.from({length: quantity}, (_, i) => ({
       id: `p${i}`,
-      label: '',
       emoji: icon,
       x: 80 + (i % 6) * 110,
       y: 100 + Math.floor(i / 6) * 120
@@ -336,25 +319,25 @@ async function generateD3Diagram(topic, type, lang) {
       .attr("y", 50)
       .attr("text-anchor", "middle")
       .attr("font-size", "22px")
+      .attr("font-weight", "bold")
       .text(label);
   } else {
-    // infographic & exploded view base
-
-Prompt: Product design, [object or vehicle with material ac-cents], exploded view diagram, white background, three-dimensional, highly detailed internal components, studio lighting, product photography,
-best quality.
-    const rootLabel = lang === 'ta' ? `${topic} (மையம்)` : `${topic} (Center)`;
+    // Infographic/Exploded view with image-like styling
+    const rootLabel = lang === 'ta' ? `${topic}` : topic;
     nodes = [
       { id: "root", label: rootLabel, group: 1, fx: width/2, fy: height/2 },
       { id: "a", label: lang==='ta'?"பகுதி 1":"Part 1", group: 2 },
       { id: "b", label: lang==='ta'?"பகுதி 2":"Part 2", group: 2 },
       { id: "c", label: lang==='ta'?"பகுதி 3":"Part 3", group: 2 },
-      { id: "d", label: lang==='ta'?"பகுதி 4":"Part 4", group: 2 }
+      { id: "d", label: lang==='ta'?"பகுதி 4":"Part 4", group: 2 },
+      { id: "e", label: lang==='ta'?"பகுதி 5":"Part 5", group: 2 }
     ];
     links = [
       { source: "root", target: "a" },
       { source: "root", target: "b" },
       { source: "root", target: "c" },
-      { source: "root", target: "d" }
+      { source: "root", target: "d" },
+      { source: "root", target: "e" }
     ];
   }
 
@@ -369,46 +352,74 @@ best quality.
     .data(links)
     .join("line")
     .attr("stroke", "#999")
-    .attr("stroke-opacity", 0.6);
+    .attr("stroke-width", 2)
+    .attr("stroke-opacity", 0.6)
+    .attr("marker-end", "url(#arrowhead)");
+
+  // Add arrowhead for links
+  svg.append("defs").append("marker")
+    .attr("id", "arrowhead")
+    .attr("viewBox", "-0 -5 10 10")
+    .attr("refX", 15)
+    .attr("refY", 0)
+    .attr("orient", "auto")
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .append("path")
+    .attr("fill", "#999")
+    .attr("d", "M0,-5L10,0L0,5");
 
   const node = svg.append("g")
     .selectAll("g")
     .data(nodes)
     .join("g")
     .call(d3.drag()
-      .on("start", d => {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-      })
-      .on("drag", d => {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
-      })
-      .on("end", d => {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-      }));
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended));
+
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
 
   if (type === 'pictograph') {
     node.append("text")
-      .attr("font-size", "48px")
+      .attr("font-size", "64px")
       .attr("text-anchor", "middle")
       .attr("dy", "0.35em")
-      .text(d => d.emoji || '');
+      .text(d => d.emoji);
   } else {
-    node.append("circle")
-      .attr("r", d => d.id === "root" ? 45 : 28)
-      .attr("fill", d => d.group === 1 ? "#1e40af" : "#60a5fa");
+    // Infographic styling - image-like appearance
+    node.append("rect")
+      .attr("width", d => d.id === "root" ? 120 : 80)
+      .attr("height", d => d.id === "root" ? 60 : 40)
+      .attr("rx", 8)
+      .attr("fill", d => d.group === 1 ? "#1e40af" : "#60a5fa")
+      .attr("stroke", "#1e3a8a")
+      .attr("stroke-width", 2);
+    
+    node.append("text")
+      .attr("dy", 20)
+      .attr("dx", d => d.id === "root" ? 10 : 10)
+      .attr("text-anchor", "start")
+      .attr("font-size", d => d.id === "root" ? "16px" : "14px")
+      .attr("font-weight", d => d.id === "root" ? "bold" : "normal")
+      .attr("fill", "white")
+      .text(d => d.label);
   }
-
-  node.append("text")
-    .attr("dy", d => type==='pictograph' ? 65 : 5)
-    .attr("dx", d => type==='pictograph' ? 0 : 35)
-    .attr("text-anchor", d => type==='pictograph' ? "middle" : "start")
-    .attr("font-size", "15px")
-    .text(d => d.label);
 
   node.append("title").text(d => d.label);
 
@@ -427,7 +438,7 @@ els.renderEditedBtn.addEventListener('click', () => {
   renderMermaid(els.codeEditor.value);
 });
 
-// Enlarge (SVG in new tab)
+// Enlarge SVG in new tab
 els.enlargeBtn.addEventListener('click', () => {
   const activeContainer = els.mermaidDiv.style.display !== 'none' ? els.mermaidDiv : els.d3Div;
   const svg = activeContainer.querySelector('svg');
@@ -436,10 +447,12 @@ els.enlargeBtn.addEventListener('click', () => {
     const blob = new Blob([svgString], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
+  } else {
+    alert(currentLang === 'en' ? "No SVG found to enlarge" : "பெரிதாக்க SVG கிடைக்கவில்லை");
   }
 });
 
-// Download (PNG or PDF)
+// Download PNG or PDF - FIXED
 els.downloadBtn.addEventListener('click', async () => {
   const format = document.querySelector('input[name="exportFormat"]:checked')?.value || 'png';
   const topicSafe = els.topic.value.trim().replace(/[^a-z0-9\u0B80-\u0DFF]/gi, '-').toLowerCase() || 'diagram';
@@ -452,41 +465,39 @@ els.downloadBtn.addEventListener('click', async () => {
     const canvas = await html2canvas(target, {
       scale: 3,
       backgroundColor: '#ffffff',
-      logging: false
+      logging: false,
+      useCORS: true,
+      allowTaint: true
     });
     const dataURL = canvas.toDataURL('image/png');
 
     if (format === 'png') {
-      const a = document.createElement('a');
-      a.href = dataURL;
-      a.download = `chartgen-pro-${topicSafe}.png`;
-      a.click();
+      const link = document.createElement('a');
+      link.download = `${topicSafe}.png`;
+      link.href = dataURL;
+      link.click();
     } else {
+      // PDF export
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 190;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      pdf.setFontSize(18);
-      pdf.text(els.topic.value.trim(), 105, 18, { align: 'center' });
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
 
-      const margin = 10;
-      const pageHeight = 277;
-
-      if (imgHeight <= pageHeight) {
-        pdf.addImage(dataURL, 'PNG', margin, 30, imgWidth, imgHeight);
-      } else {
-        pdf.addImage(dataURL, 'PNG', margin, 30, imgWidth, pageHeight);
-        pdf.addPage();
-        pdf.addImage(dataURL, 'PNG', margin, 30 - pageHeight, imgWidth, imgHeight);
+      let position = 0;
+      pdf.addImage(dataURL, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
       }
-      pdf.save(`chartgen-pro-${topicSafe}.pdf`);
+
+      pdf.save(`${topicSafe}.pdf`);
     }
   } catch (err) {
     alert((currentLang === 'en' ? "Export failed:\n" : "பதிவிறக்கம் தோல்வி:\n") + err.message);
-  } finally {
-    els.loader.style.display = 'none';
-    els.downloadBtn.disabled = false;
   }
+
+  els.loader.style.display = 'none';
+  els.downloadBtn.disabled = false;
 });
 </script>
 </body>
