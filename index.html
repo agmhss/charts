@@ -3,60 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CHARTGEN PRO</title>
+  <title>CHARTGEN PRO – கல்வி வரைபட உருவாக்கி</title>
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --font-main: 'Roboto', 'Noto Sans Tamil', system-ui, sans-serif;
+      --font-tamil: 'Noto Sans Tamil', sans-serif;
+    }
     body {
-      font-family: system-ui, sans-serif;
+      font-family: var(--font-main);
       background: #f8f9fa;
       margin: 0;
       padding: 20px;
+      color: #333;
     }
     .app-container {
-      max-width: 820px;
+      max-width: 860px;
       margin: 0 auto;
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       overflow: hidden;
     }
     .header {
-      background: #1a3c66;
+      background: #1e40af;
       color: white;
-      padding: 14px 20px;
+      padding: 16px 24px;
       font-weight: 600;
+      font-size: 1.3rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+    .lang-toggle {
+      background: rgba(255,255,255,0.25);
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
     .section {
-      padding: 20px 24px;
+      padding: 24px;
       border-bottom: 1px solid #eee;
     }
-    .section:last-child { border-bottom: none; }
-    .form-group { margin: 16px 0; }
-    label { font-weight: 600; display: block; margin-bottom: 6px; color: #444; }
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e40af;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      color: #444;
+    }
     input[type=text], input[type=password] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 11px 14px;
       border: 1px solid #d1d5db;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 1rem;
     }
     .chart-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px 16px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px 20px;
+      margin-top: 8px;
     }
     .preview-area {
-      min-height: 280px;
+      min-height: 300px;
       background: #f9fafb;
       border: 2px dashed #cbd5e1;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 20px;
       margin: 16px 0;
       position: relative;
@@ -67,24 +95,32 @@
       min-width: 100%;
       text-align: center;
     }
+    #mermaid-container svg text {
+      font-family: var(--font-main) !important;
+    }
     .loader {
       border: 5px solid #e5e7eb;
       border-top: 5px solid #3b82f6;
       border-radius: 50%;
-      width: 38px;
-      height: 38px;
+      width: 42px;
+      height: 42px;
       animation: spin 1s linear infinite;
-      margin: 80px auto;
+      margin: 100px auto;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
     button {
-      padding: 10px 18px;
+      padding: 10px 20px;
       border: none;
       border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
+      font-size: 0.95rem;
     }
     .primary   { background: #2563eb; color: white; }
     .primary:hover   { background: #1d4ed8; }
@@ -92,103 +128,136 @@
     .success:hover  { background: #15803d; }
     .secondary { background: #6b7280; color: white; }
     .secondary:hover { background: #4b5563; }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
-
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
     .code-editor {
       width: 100%;
-      height: 180px;
-      font-family: 'Consolas', monospace;
-      font-size: 13.5px;
+      height: 200px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 14px;
       padding: 12px;
       border: 1px solid #d1d5db;
       border-radius: 6px;
       resize: vertical;
       background: #f8fafc;
+      margin: 12px 0;
+    }
+    .lang-tamil body, .lang-tamil label, .lang-tamil button, .lang-tamil .section-title {
+      font-family: var(--font-tamil);
     }
   </style>
 </head>
-<body>
+<body class="lang-english">
 
 <div class="app-container">
   <div class="header">
-    <span>CHARTGEN PRO – Educational Diagrams</span>
+    <span data-en="CHARTGEN PRO – Educational Diagram Creator" data-ta="சார்ட்ஜென் ப்ரோ – கல்வி வரைபட உருவாக்கி">CHARTGEN PRO – Educational Diagram Creator</span>
+    <button class="lang-toggle" id="langToggle">தமிழ்</button>
   </div>
 
   <div class="section">
+    <div class="section-title" data-en="1. Create New Diagram" data-ta="1. புதிய வரைபடம் உருவாக்கு">1. Create New Diagram</div>
+
     <div class="form-group">
-      <label>Groq API Key (stored locally)</label>
+      <label data-en="Groq API Key (saved locally)" data-ta="க்ரோக் API கீ (உங்கள் உலாவியில் சேமிக்கப்படும்)">Groq API Key (saved locally)</label>
       <input type="password" id="groqKey" placeholder="gsk_...">
     </div>
 
     <div class="form-group">
-      <label>Topic / Concept</label>
-      <input type="text" id="contentInput" value="Human Eye Anatomy" placeholder="e.g. Photosynthesis process">
+      <label data-en="Topic / Concept" data-ta="தலைப்பு / கருத்து">Topic / Concept</label>
+      <input type="text" id="contentInput" value="Human Eye Anatomy" data-en-placeholder="e.g. Photosynthesis process" data-ta-placeholder="எ.கா. ஒளிச்சேர்க்கை செயல்முறை" placeholder="e.g. Photosynthesis process">
     </div>
 
     <div class="form-group">
-      <label>Diagram Type</label>
+      <label data-en="Diagram Type" data-ta="வரைபட வகை">Diagram Type</label>
       <div class="chart-grid">
-        <label><input type="radio" name="chartType" value="flowchart" checked> Flowchart</label>
-        <label><input type="radio" name="chartType" value="mindmap"> Mindmap</label>
-        <label><input type="radio" name="chartType" value="sequenceDiagram"> Sequence</label>
-        <label><input type="radio" name="chartType" value="classDiagram"> Class / ER</label>
-        <label><input type="radio" name="chartType" value="timeline"> Timeline</label>
-        <label><input type="radio" name="chartType" value="pie"> Pie Chart</label>
+        <label><input type="radio" name="chartType" value="flowchart" checked> <span data-en="Flowchart / Process" data-ta="பாய்வு வரைபடம் / செயல்முறை">Flowchart / Process</span></label>
+        <label><input type="radio" name="chartType" value="mindmap"> <span data-en="Mind Map" data-ta="மன வரைபடம்">Mind Map</span></label>
+        <label><input type="radio" name="chartType" value="sequenceDiagram"> <span data-en="Sequence Diagram" data-ta="தொடர் வரைபடம்">Sequence Diagram</span></label>
+        <label><input type="radio" name="chartType" value="classDiagram"> <span data-en="Class / Entity Diagram" data-ta="வகுப்பு / பொருள் வரைபடம்">Class / Entity Diagram</span></label>
+        <label><input type="radio" name="chartType" value="timeline"> <span data-en="Timeline" data-ta="காலவரிசை">Timeline</span></label>
+        <label><input type="radio" name="chartType" value="pie"> <span data-en="Pie Chart" data-ta="வட்ட வரைபடம்">Pie Chart</span></label>
+        <label><input type="radio" name="chartType" value="infographic"> <span data-en="Infographic" data-ta="தகவல் வரைபடம்">Infographic</span></label>
+        <label><input type="radio" name="chartType" value="pictograph"> <span data-en="Pictograph" data-ta="படக்குறியீட்டு வரைபடம்">Pictograph</span></label>
+        <label><input type="radio" name="chartType" value="explodedview"> <span data-en="Exploded View" data-ta="விரிந்த பார்வை">Exploded View</span></label>
       </div>
     </div>
 
-    <button class="primary" id="generateBtn">Generate Diagram</button>
+    <button class="primary" id="generateBtn" data-en="Generate Diagram" data-ta="வரைபடத்தை உருவாக்கு">Generate Diagram</button>
   </div>
 
   <div class="section">
-    <h3 style="margin:0 0 12px 0">Preview & Edit</h3>
+    <div class="section-title" data-en="2. Preview & Edit Code" data-ta="2. முன்னோட்டம் & குறியீட்டை திருத்து">2. Preview & Edit Code</div>
 
     <div class="preview-area" id="previewArea">
-      <div class="loader" id="loader"></div>
+      <div class="loader" id="loader" style="display:none"></div>
       <div id="mermaid-container"></div>
     </div>
 
-    <textarea class="code-editor" id="mermaidCodeEditor" placeholder="Mermaid code will appear here..."></textarea>
+    <textarea class="code-editor" id="mermaidCodeEditor" placeholder="Mermaid code appears here..."></textarea>
 
     <div class="controls">
-      <button class="primary" id="renderEditedBtn">Render Edited Code</button>
-      <button class="secondary" id="enlargeBtn">Open SVG in new tab</button>
+      <button class="primary" id="renderEditedBtn" data-en="Render Edited Code" data-ta="திருத்திய குறியீட்டை வரை">Render Edited Code</button>
+      <button class="secondary" id="enlargeBtn" data-en="Open SVG in New Tab" data-ta="SVG-ஐ புதிய தாவலில் திற">Open SVG in New Tab</button>
     </div>
   </div>
 
   <div class="section">
-    <h3 style="margin:0 0 12px 0">Export</h3>
+    <div class="section-title" data-en="3. Export" data-ta="3. பதிவிறக்கு">3. Export</div>
 
-    <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
-      <label><input type="radio" name="exportFormat" value="png" checked> PNG</label>
-      <label><input type="radio" name="exportFormat" value="pdf"> PDF (A4)</label>
+    <div style="display:flex; gap:28px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+      <label><input type="radio" name="exportFormat" value="png" checked> <span data-en="PNG Image" data-ta="PNG படம்">PNG Image</span></label>
+      <label><input type="radio" name="exportFormat" value="pdf"> <span data-en="PDF (A4)" data-ta="PDF (A4)">PDF (A4)</span></label>
     </div>
 
     <div class="controls">
-      <button class="success" id="downloadBtn" disabled>Download</button>
+      <button class="success" id="downloadBtn" disabled data-en="Download File" data-ta="கோப்பை பதிவிறக்கு">Download File</button>
     </div>
   </div>
 </div>
 
 <script>
+const langToggle = document.getElementById('langToggle');
+let currentLang = 'en'; // 'en' or 'ta'
+
+function updateLanguage() {
+  currentLang = currentLang === 'en' ? 'ta' : 'en';
+  document.body.className = currentLang === 'en' ? 'lang-english' : 'lang-tamil';
+  langToggle.textContent = currentLang === 'en' ? 'தமிழ்' : 'English';
+
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const key = currentLang === 'en' ? 'data-en' : 'data-ta';
+    if (el.hasAttribute(key)) el.textContent = el.getAttribute(key);
+  });
+
+  document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+    const key = currentLang === 'en' ? 'data-en-placeholder' : 'data-ta-placeholder';
+    if (el.hasAttribute(key)) el.placeholder = el.getAttribute(key);
+  });
+}
+
+langToggle.onclick = updateLanguage;
+
+// Initial update (in case browser prefers Tamil, but default English)
+updateLanguage();
+
 mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
-  flowchart: { useMaxWidth: false },
+  flowchart: { useMaxWidth: false, htmlLabels: true },
   mindmap:   { useMaxWidth: false },
   sequence:  { useMaxWidth: false }
 });
 
 const els = {
-  groqKey:        document.getElementById('groqKey'),
-  topic:          document.getElementById('contentInput'),
-  generateBtn:    document.getElementById('generateBtn'),
-  downloadBtn:    document.getElementById('downloadBtn'),
-  enlargeBtn:     document.getElementById('enlargeBtn'),
-  loader:         document.getElementById('loader'),
-  mermaidDiv:     document.getElementById('mermaid-container'),
-  codeEditor:     document.getElementById('mermaidCodeEditor'),
-  renderEditedBtn:document.getElementById('renderEditedBtn')
+  groqKey: document.getElementById('groqKey'),
+  topic: document.getElementById('contentInput'),
+  generateBtn: document.getElementById('generateBtn'),
+  downloadBtn: document.getElementById('downloadBtn'),
+  enlargeBtn: document.getElementById('enlargeBtn'),
+  loader: document.getElementById('loader'),
+  mermaidDiv: document.getElementById('mermaid-container'),
+  codeEditor: document.getElementById('mermaidCodeEditor'),
+  renderEditedBtn: document.getElementById('renderEditedBtn')
 };
 
 if (localStorage.getItem('groqApiKey')) {
@@ -196,12 +265,12 @@ if (localStorage.getItem('groqApiKey')) {
 }
 
 els.generateBtn.onclick = async () => {
-  const key   = els.groqKey.value.trim();
+  const key = els.groqKey.value.trim();
   const topic = els.topic.value.trim();
-  const type  = document.querySelector('input[name="chartType"]:checked')?.value;
+  const rawType = document.querySelector('input[name="chartType"]:checked')?.value;
 
-  if (!key)   return alert("API key required");
-  if (!topic) return alert("Please enter a topic");
+  if (!key)   return alert(currentLang==='en'?"API key required":"API கீ தேவை");
+  if (!topic) return alert(currentLang==='en'?"Please enter a topic":"தயவு செய்து தலைப்பை உள்ளிடவும்");
 
   localStorage.setItem('groqApiKey', key);
 
@@ -211,14 +280,33 @@ els.generateBtn.onclick = async () => {
   els.mermaidDiv.innerHTML = '';
   els.codeEditor.value = '';
 
-  const prompt = `Create ONLY valid Mermaid ${type} syntax — nothing else.
-Do NOT use markdown code blocks.
-Do NOT add explanations.
-Start directly with the diagram type keyword.
-Topic: ${topic}
+  // Map special types to prompt instructions
+  let type = rawType;
+  let typeInstruction = `${type}`;
+  if (rawType === 'infographic') {
+    typeInstruction = 'infographic style using flowchart or mindmap layout with colorful sections, icons descriptions, statistics and key facts';
+  } else if (rawType === 'pictograph') {
+    typeInstruction = 'pictograph / isotype style using many repeated icons or symbols to represent quantities – use mindmap or flowchart with icon-like nodes';
+  } else if (rawType === 'explodedview') {
+    typeInstruction = 'exploded view diagram style showing parts separated but connected with lines or arrows – best approximated with flowchart TD or graph';
+  }
 
-Make it detailed, educational, well-structured and readable.
-Use good indentation.`.trim();
+  const langInstruction = currentLang === 'ta'
+    ? "All labels, node texts, titles and descriptions MUST be in தமிழ் மொழி (Tamil script)."
+    : "All labels, node texts, titles and descriptions MUST be in English.";
+
+  const prompt = `You are an expert educational diagram creator.
+Create ONLY valid Mermaid code – nothing else.
+Do NOT use markdown code blocks like \`\`\`mermaid.
+Do NOT write explanations or greetings.
+Start directly with the diagram keyword (flowchart TD, mindmap, etc.)
+
+Topic: "${topic}"
+Diagram style: ${typeInstruction}
+${langInstruction}
+
+Make it detailed, clear, educational, well-structured and beautiful.
+Use good indentation and clear hierarchy.`.trim();
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -228,10 +316,10 @@ Use good indentation.`.trim();
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",   // or "deepseek-r1", "qwen-2.5-coder-32b" etc.
+        model: "llama-3.3-70b-versatile",
         messages: [{role:"user", content:prompt}],
-        temperature: 0.15,
-        max_tokens: 1800
+        temperature: 0.2,
+        max_tokens: 2200
       })
     });
 
@@ -240,12 +328,13 @@ Use good indentation.`.trim();
     const data = await res.json();
     let code = data.choices[0].message.content.trim();
 
-    // Aggressive cleanup — most common LLM mistakes
+    // Aggressive cleanup
     code = code
       .replace(/^```(?:mermaid)?\s*/i, '')
       .replace(/```$/g, '')
       .replace(/^`+/, '')
       .replace(/`+$/, '')
+      .replace(/^(graph|flowchart|mindmap|sequenceDiagram|classDiagram|timeline|pie)/i, m => m.toLowerCase())
       .trim();
 
     els.codeEditor.value = code;
@@ -254,7 +343,7 @@ Use good indentation.`.trim();
   }
   catch (err) {
     console.error(err);
-    alert("Generation failed\n\n" + (err.message || err));
+    alert(currentLang==='en' ? "Generation failed\n\n" + err.message : "உருவாக்கம் தோல்வியடைந்தது\n\n" + err.message);
   }
   finally {
     els.loader.style.display = 'none';
@@ -266,17 +355,16 @@ async function renderMermaid(code) {
   if (!code.trim()) return;
 
   try {
-    const { svg } = await mermaid.render('mermaid-'+Date.now(), code);
+    const id = 'mermaid-' + Date.now();
+    const { svg } = await mermaid.render(id, code);
     els.mermaidDiv.innerHTML = svg;
     els.downloadBtn.disabled = false;
   } catch (e) {
-    els.mermaidDiv.innerHTML = `<pre style="color:#c00; font-family:monospace; white-space:pre-wrap;">${e.message || e}\n\n${code}</pre>`;
+    els.mermaidDiv.innerHTML = `<pre style="color:#c00; font-family:monospace; white-space:pre-wrap; padding:16px;">Error:\n${e.message || e}\n\n${code}</pre>`;
   }
 }
 
-els.renderEditedBtn.onclick = () => {
-  renderMermaid(els.codeEditor.value);
-};
+els.renderEditedBtn.onclick = () => renderMermaid(els.codeEditor.value);
 
 els.enlargeBtn.onclick = () => {
   const svg = els.mermaidDiv.querySelector('svg');
@@ -288,7 +376,7 @@ els.enlargeBtn.onclick = () => {
 
 els.downloadBtn.onclick = async () => {
   const format = document.querySelector('input[name="exportFormat"]:checked')?.value || 'png';
-  const topic = els.topic.value.trim().replace(/[^a-z0-9]+/gi,'-').toLowerCase() || 'diagram';
+  const topic = els.topic.value.trim().replace(/[^a-z0-9\u0B80-\u0DFF]+/gi,'-').toLowerCase() || 'diagram';
 
   els.loader.style.display = 'block';
 
@@ -296,9 +384,7 @@ els.downloadBtn.onclick = async () => {
     const canvas = await html2canvas(els.mermaidDiv, {
       scale: 3,
       backgroundColor: '#ffffff',
-      logging: false,
-      useCORS: true,
-      allowTaint: true
+      logging: false
     });
 
     const dataURL = canvas.toDataURL('image/png');
@@ -306,31 +392,33 @@ els.downloadBtn.onclick = async () => {
     if (format === 'png') {
       const a = document.createElement('a');
       a.href = dataURL;
-      a.download = `chart-${topic}.png`;
+      a.download = `chartgen-${topic}.png`;
       a.click();
     } else {
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
       const w = 190;
-      const h = canvas.height * w / canvas.width;
+      let h = canvas.height * w / canvas.width;
 
       pdf.setFontSize(18);
       pdf.text(els.topic.value.trim(), 105, 18, { align: 'center' });
 
-      if (h > 260) {
-        // very basic multi-page support
-        pdf.addImage(dataURL, 'PNG', 10, 30, w, 260);
-        pdf.addPage();
-        pdf.addImage(dataURL, 'PNG', 10, -230 + h, w, h);
+      const margin = 10;
+      const maxH = 277;
+
+      if (h <= maxH) {
+        pdf.addImage(dataURL, 'PNG', margin, 30, w, h);
       } else {
-        pdf.addImage(dataURL, 'PNG', 10, 30, w, h);
+        pdf.addImage(dataURL, 'PNG', margin, 30, w, maxH);
+        pdf.addPage();
+        pdf.addImage(dataURL, 'PNG', margin, 30 - maxH, w, h);
       }
 
-      pdf.save(`chart-${topic}.pdf`);
+      pdf.save(`chartgen-${topic}.pdf`);
     }
   } catch (e) {
     console.error(e);
-    alert("Export failed");
+    alert(currentLang==='en' ? "Export failed" : "பதிவிறக்கம் தோல்வியடைந்தது");
   } finally {
     els.loader.style.display = 'none';
   }
