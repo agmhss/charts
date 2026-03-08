@@ -9,6 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
@@ -51,99 +52,48 @@
       font-size: 0.9rem;
       font-weight: 500;
     }
-    .section {
-      padding: 24px;
-      border-bottom: 1px solid #eee;
-    }
-    .section-title {
-      margin: 0 0 16px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1e40af;
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 8px;
-      color: #444;
-    }
+    .section { padding: 24px; border-bottom: 1px solid #eee; }
+    .section-title { margin: 0 0 16px; font-size: 1.25rem; font-weight: 600; color: #1e40af; }
+    label { font-weight: 600; display: block; margin-bottom: 8px; color: #444; }
     input[type=text], input[type=password] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 1rem;
+      width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;
     }
     .chart-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px 20px;
-      margin-top: 8px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 20px; margin-top: 8px;
     }
     .preview-area {
-      min-height: 300px;
-      background: #f9fafb;
-      border: 2px dashed #cbd5e1;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 16px 0;
-      position: relative;
-      overflow: auto;
+      min-height: 400px; background: #f9fafb; border: 2px dashed #cbd5e1; border-radius: 10px;
+      padding: 20px; margin: 16px 0; position: relative; overflow: auto;
     }
-    #mermaid-container {
-      display: inline-block;
-      min-width: 100%;
-      text-align: center;
-    }
-    #mermaid-container svg text {
+    #mermaid-container, #d3-container { min-width: 100%; text-align: center; }
+    #mermaid-container svg text, #d3-container text {
       font-family: var(--font-main) !important;
     }
     .loader {
-      border: 5px solid #e5e7eb;
-      border-top: 5px solid #3b82f6;
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      animation: spin 1s linear infinite;
-      margin: 100px auto;
+      border: 5px solid #e5e7eb; border-top: 5px solid #3b82f6; border-radius: 50%;
+      width: 42px; height: 42px; animation: spin 1s linear infinite; margin: 100px auto;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .controls {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 16px 0;
-    }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
     button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.95rem;
+      padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem;
     }
-    .primary   { background: #2563eb; color: white; }
-    .primary:hover   { background: #1d4ed8; }
-    .success  { background: #16a34a; color: white; }
-    .success:hover  { background: #15803d; }
+    .primary { background: #2563eb; color: white; }
+    .primary:hover { background: #1d4ed8; }
+    .success { background: #16a34a; color: white; }
+    .success:hover { background: #15803d; }
     .secondary { background: #6b7280; color: white; }
     .secondary:hover { background: #4b5563; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     .code-editor {
-      width: 100%;
-      height: 200px;
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 14px;
-      padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      resize: vertical;
-      background: #f8fafc;
-      margin: 12px 0;
+      width: 100%; height: 200px; font-family: 'Consolas', monospace; font-size: 14px;
+      padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical;
+      background: #f8fafc; margin: 12px 0;
     }
     .lang-tamil body, .lang-tamil label, .lang-tamil button, .lang-tamil .section-title {
       font-family: var(--font-tamil);
     }
+    #d3-container svg { max-width: 100%; height: auto; }
   </style>
 </head>
 <body class="lang-english">
@@ -154,6 +104,7 @@
     <button class="lang-toggle" id="langToggle">தமிழ்</button>
   </div>
 
+  <!-- Rest of your HTML sections remain almost the same -->
   <div class="section">
     <div class="section-title" data-en="1. Create New Diagram" data-ta="1. புதிய வரைபடம் உருவாக்கு">1. Create New Diagram</div>
 
@@ -190,10 +141,11 @@
 
     <div class="preview-area" id="previewArea">
       <div class="loader" id="loader" style="display:none"></div>
-      <div id="mermaid-container"></div>
+      <div id="mermaid-container" style="display:none;"></div>
+      <div id="d3-container"></div>
     </div>
 
-    <textarea class="code-editor" id="mermaidCodeEditor" placeholder="Mermaid code appears here..."></textarea>
+    <textarea class="code-editor" id="mermaidCodeEditor" placeholder="Mermaid code appears here... (for Mermaid types)"></textarea>
 
     <div class="controls">
       <button class="primary" id="renderEditedBtn" data-en="Render Edited Code" data-ta="திருத்திய குறியீட்டை வரை">Render Edited Code</button>
@@ -203,12 +155,10 @@
 
   <div class="section">
     <div class="section-title" data-en="3. Export" data-ta="3. பதிவிறக்கு">3. Export</div>
-
     <div style="display:flex; gap:28px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
       <label><input type="radio" name="exportFormat" value="png" checked> <span data-en="PNG Image" data-ta="PNG படம்">PNG Image</span></label>
       <label><input type="radio" name="exportFormat" value="pdf"> <span data-en="PDF (A4)" data-ta="PDF (A4)">PDF (A4)</span></label>
     </div>
-
     <div class="controls">
       <button class="success" id="downloadBtn" disabled data-en="Download File" data-ta="கோப்பை பதிவிறக்கு">Download File</button>
     </div>
@@ -216,36 +166,32 @@
 </div>
 
 <script>
+// Language toggle logic (same as before)
 const langToggle = document.getElementById('langToggle');
-let currentLang = 'en'; // 'en' or 'ta'
-
+let currentLang = 'en';
 function updateLanguage() {
   currentLang = currentLang === 'en' ? 'ta' : 'en';
   document.body.className = currentLang === 'en' ? 'lang-english' : 'lang-tamil';
   langToggle.textContent = currentLang === 'en' ? 'தமிழ்' : 'English';
-
   document.querySelectorAll('[data-en]').forEach(el => {
     const key = currentLang === 'en' ? 'data-en' : 'data-ta';
     if (el.hasAttribute(key)) el.textContent = el.getAttribute(key);
   });
-
   document.querySelectorAll('[data-en-placeholder]').forEach(el => {
     const key = currentLang === 'en' ? 'data-en-placeholder' : 'data-ta-placeholder';
     if (el.hasAttribute(key)) el.placeholder = el.getAttribute(key);
   });
 }
-
 langToggle.onclick = updateLanguage;
-
-// Initial update (in case browser prefers Tamil, but default English)
 updateLanguage();
 
+// Mermaid init
 mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
   flowchart: { useMaxWidth: false, htmlLabels: true },
-  mindmap:   { useMaxWidth: false },
-  sequence:  { useMaxWidth: false }
+  mindmap: { useMaxWidth: false },
+  sequence: { useMaxWidth: false }
 });
 
 const els = {
@@ -256,6 +202,7 @@ const els = {
   enlargeBtn: document.getElementById('enlargeBtn'),
   loader: document.getElementById('loader'),
   mermaidDiv: document.getElementById('mermaid-container'),
+  d3Div: document.getElementById('d3-container'),
   codeEditor: document.getElementById('mermaidCodeEditor'),
   renderEditedBtn: document.getElementById('renderEditedBtn')
 };
@@ -269,168 +216,163 @@ els.generateBtn.onclick = async () => {
   const topic = els.topic.value.trim();
   const rawType = document.querySelector('input[name="chartType"]:checked')?.value;
 
-  if (!key)   return alert(currentLang==='en'?"API key required":"API கீ தேவை");
-  if (!topic) return alert(currentLang==='en'?"Please enter a topic":"தயவு செய்து தலைப்பை உள்ளிடவும்");
-  if (['infographic', 'pictograph', 'explodedview'].includes(rawType)) {
-  // Use D3 mode
-  await generateD3Diagram(topic, rawType, currentLang);
-} else {
-  // Existing Mermaid prompt & render
-}
+  if (!key) return alert(currentLang==='en' ? "API key required" : "API கீ தேவை");
+  if (!topic) return alert(currentLang==='en' ? "Please enter a topic" : "தயவு செய்து தலைப்பை உள்ளிடவும்");
+
   localStorage.setItem('groqApiKey', key);
 
   els.loader.style.display = 'block';
   els.generateBtn.disabled = true;
   els.downloadBtn.disabled = true;
-  els.mermaidDiv.innerHTML = '';
+  els.mermaidDiv.style.display = 'none';
+  els.d3Div.innerHTML = '';
   els.codeEditor.value = '';
+  els.codeEditor.placeholder = "Mermaid code appears here... (only for standard types)";
 
-  // Map special types to prompt instructions
-  let type = rawType;
-  let typeInstruction = `${type}`;
-  if (rawType === 'infographic') {
-    typeInstruction = 'infographic style using flowchart or mindmap layout with colorful sections, icons descriptions, statistics and key facts';
-  } else if (rawType === 'pictograph') {
-    typeInstruction = 'pictograph / isotype style using many repeated icons or symbols to represent quantities – use mindmap or flowchart with icon-like nodes';
-  } else if (rawType === 'explodedview') {
-    typeInstruction = 'exploded view diagram style showing parts separated but connected with lines or arrows – best approximated with flowchart TD or graph';
-  }
+  let isD3 = ['infographic', 'pictograph', 'explodedview'].includes(rawType);
 
-  const langInstruction = currentLang === 'ta'
-    ? "All labels, node texts, titles and descriptions MUST be in தமிழ் மொழி (Tamil script)."
-    : "All labels, node texts, titles and descriptions MUST be in English.";
+  if (isD3) {
+    await generateD3Diagram(topic, rawType, currentLang);
+  } else {
+    // Mermaid path (same as before, with emoji encouragement)
+    let typeInstruction = rawType;
+    if (rawType === 'flowchart') typeInstruction = 'flowchart LR or TD';
+    const langInstruction = currentLang === 'ta'
+      ? "All labels MUST be in தமிழ் மொழி. Use relevant emoji icons (e.g. 👁️, 📊) to make it visual."
+      : "All labels MUST be in English. Use relevant emoji icons (e.g. 👁️, 📊) to make it visual.";
 
-  const prompt = `You are an expert educational diagram creator.
+    const prompt = `You are an expert educational diagram creator.
 Create ONLY valid Mermaid code – nothing else.
-Do NOT use markdown code blocks like \`\`\`mermaid.
-Do NOT write explanations or greetings.
-Start directly with the diagram keyword (flowchart TD, mindmap, etc.)
-
+Start directly with diagram keyword.
 Topic: "${topic}"
 Diagram style: ${typeInstruction}
 ${langInstruction}
+Make it detailed, educational, beautiful. Use emoji for visual enhancement.`.trim();
 
-Make it detailed, clear, educational, well-structured and beautiful.
-Use good indentation and clear hierarchy.`.trim();
-
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{role:"user", content:prompt}],
-        temperature: 0.2,
-        max_tokens: 2200
-      })
-    });
-
-    if (!res.ok) throw new Error(await res.text());
-
-    const data = await res.json();
-    let code = data.choices[0].message.content.trim();
-
-    // Aggressive cleanup
-    code = code
-      .replace(/^```(?:mermaid)?\s*/i, '')
-      .replace(/```$/g, '')
-      .replace(/^`+/, '')
-      .replace(/`+$/, '')
-      .replace(/^(graph|flowchart|mindmap|sequenceDiagram|classDiagram|timeline|pie)/i, m => m.toLowerCase())
-      .trim();
-
-    els.codeEditor.value = code;
-
-    await renderMermaid(code);
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [{role:"user", content:prompt}],
+          temperature: 0.2,
+          max_tokens: 2200
+        })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      let code = data.choices[0].message.content.trim();
+      code = code.replace(/^```(?:mermaid)?\s*/i, '').replace(/```$/g, '').trim();
+      els.codeEditor.value = code;
+      await renderMermaid(code);
+      els.mermaidDiv.style.display = 'block';
+    } catch (err) {
+      alert(currentLang==='en' ? "Generation failed" : "உருவாக்கம் தோல்வி" + "\n" + err.message);
+    }
   }
-  catch (err) {
-    console.error(err);
-    alert(currentLang==='en' ? "Generation failed\n\n" + err.message : "உருவாக்கம் தோல்வியடைந்தது\n\n" + err.message);
-  }
-  finally {
-    els.loader.style.display = 'none';
-    els.generateBtn.disabled = false;
-  }
+
+  els.loader.style.display = 'none';
+  els.generateBtn.disabled = false;
+  els.downloadBtn.disabled = false;
 };
 
 async function renderMermaid(code) {
   if (!code.trim()) return;
-
   try {
     const id = 'mermaid-' + Date.now();
     const { svg } = await mermaid.render(id, code);
     els.mermaidDiv.innerHTML = svg;
-    els.downloadBtn.disabled = false;
   } catch (e) {
-    els.mermaidDiv.innerHTML = `<pre style="color:#c00; font-family:monospace; white-space:pre-wrap; padding:16px;">Error:\n${e.message || e}\n\n${code}</pre>`;
+    els.mermaidDiv.innerHTML = `<pre style="color:#c00;">Error: ${e.message}\n\n${code}</pre>`;
   }
 }
 
-els.renderEditedBtn.onclick = () => renderMermaid(els.codeEditor.value);
-async function generateD3Diagram(topic, diagramType, lang) {
-  els.loader.style.display = 'block';
-  els.mermaidDiv.innerHTML = ''; // Reuse the same container
+async function generateD3Diagram(topic, type, lang) {
+  els.d3Div.innerHTML = '';
 
-  // Simple placeholder data (in real app → generate via Groq or hardcode structures)
-  const nodes = [
-    { id: "root", label: lang === 'ta' ? `${topic} (மையம்)` : `${topic} (Center)`, group: 1 },
-    { id: "part1", label: lang === 'ta' ? "பகுதி 1" : "Part 1", group: 2 },
-    { id: "part2", label: lang === 'ta' ? "பகுதி 2" : "Part 2", group: 2 },
-    // Add more dynamically from LLM if possible
-  ];
-
-  const links = [
-    { source: "root", target: "part1" },
-    { source: "root", target: "part2" },
-  ];
-
-  const width = els.mermaidDiv.clientWidth || 800;
+  const width = 800;
   const height = 500;
-
-  const svg = d3.select(els.mermaidDiv)
+  const svg = d3.select(els.d3Div)
     .append("svg")
     .attr("width", "100%")
     .attr("height", height)
     .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("style", "max-width: 100%; height: auto;");
+    .attr("style", "max-width:100%; height:auto; font-family: ${lang==='ta' ? "'Noto Sans Tamil', sans-serif" : "Roboto, sans-serif"};");
+
+  let nodes = [];
+  let links = [];
+  let title = lang === 'ta' ? `${topic} (மையம்)` : `${topic} (Center)`;
+
+  if (type === 'pictograph') {
+    // Simple repeated icons example (e.g. quantity pictograph)
+    const quantity = 10; // could come from prompt later
+    const icon = lang === 'ta' ? '👨‍🎓' : '👤';
+    const label = lang === 'ta' ? 'மாணவர்கள்' : 'Students';
+    nodes = Array.from({length: quantity}, (_, i) => ({
+      id: `icon${i}`, label: '', emoji: icon, x: 100 + (i % 5)*120, y: 100 + Math.floor(i/5)*120
+    }));
+    svg.append("text")
+      .attr("x", width/2).attr("y", 40).attr("text-anchor", "middle")
+      .attr("font-size", "20px").text(`${quantity} ${label}`);
+  } else {
+    // Infographic & Exploded: force-directed base
+    nodes = [
+      { id: "root", label: title, group: 1, fx: width/2, fy: height/2 },
+      { id: "p1", label: lang==='ta'?"பகுதி 1":"Part 1", group: 2 },
+      { id: "p2", label: lang==='ta'?"பகுதி 2":"Part 2", group: 2 },
+      { id: "p3", label: lang==='ta'?"பகுதி 3":"Part 3", group: 2 },
+      { id: "p4", label: lang==='ta'?"பகுதி 4":"Part 4", group: 2 }
+    ];
+    links = [
+      { source: "root", target: "p1" },
+      { source: "root", target: "p2" },
+      { source: "root", target: "p3" },
+      { source: "root", target: "p4" }
+    ];
+  }
 
   const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id(d => d.id).distance(120))
-    .force("charge", d3.forceManyBody().strength(-300))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("link", d3.forceLink(links).id(d => d.id).distance(140).strength(0.4))
+    .force("charge", d3.forceManyBody().strength(type==='pictograph' ? 0 : -400))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collision", d3.forceCollide().radius(35));
 
   const link = svg.append("g")
     .selectAll("line")
     .data(links)
     .join("line")
-    .attr("stroke", "#999")
-    .attr("stroke-opacity", 0.6);
+    .attr("stroke", "#999").attr("stroke-opacity", 0.6);
 
   const node = svg.append("g")
     .selectAll("g")
     .data(nodes)
     .join("g")
     .call(d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended));
+      .on("start", d => { if (!d3.event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on("drag", d => { d.fx = d3.event.x; d.fy = d3.event.y; })
+      .on("end", d => { if (!d3.event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
 
-  node.append("circle")
-    .attr("r", 25)
-    .attr("fill", d => d.group === 1 ? "#1e40af" : "#60a5fa");
+  if (type === 'pictograph') {
+    node.append("text")
+      .attr("font-size", "40px")
+      .attr("text-anchor", "middle")
+      .attr("dy", "0.35em")
+      .text(d => d.emoji || '');
+  } else {
+    node.append("circle")
+      .attr("r", d => d.id === "root" ? 40 : 25)
+      .attr("fill", d => d.group === 1 ? "#1e40af" : "#60a5fa");
+  }
 
   node.append("text")
-    .attr("dy", 4)
-    .attr("dx", 30)
-    .text(d => d.label)
-    .attr("font-family", lang === 'ta' ? "'Noto Sans Tamil', sans-serif" : "Roboto, sans-serif")
-    .attr("font-size", "14px");
+    .attr("dy", d => type==='pictograph' ? 60 : 4)
+    .attr("dx", d => type==='pictograph' ? 0 : 30)
+    .attr("text-anchor", d => type==='pictograph' ? "middle" : "start")
+    .attr("font-size", "14px")
+    .text(d => d.label);
 
-  // Tooltip example
-  node.append("title").text(d => `Click or drag ${d.label}`);
+  node.append("title").text(d => d.label);
 
   simulation.on("tick", () => {
     link
@@ -438,52 +380,34 @@ async function generateD3Diagram(topic, diagramType, lang) {
       .attr("y1", d => d.source.y)
       .attr("x2", d => d.target.x)
       .attr("y2", d => d.target.y);
-
-    node
-      .attr("transform", d => `translate(${d.x},${d.y})`);
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
   });
-
-  function dragstarted(event, d) {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(event, d) {
-    d.fx = event.x;
-    d.fy = event.y;
-  }
-
-  function dragended(event, d) {
-    if (!event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  els.loader.style.display = 'none';
-  els.downloadBtn.disabled = false;
 }
+
+els.renderEditedBtn.onclick = () => {
+  renderMermaid(els.codeEditor.value);
+  // For D3, re-generate if needed (or skip since no code edit for D3 yet)
+};
+
 els.enlargeBtn.onclick = () => {
-  const svg = els.mermaidDiv.querySelector('svg');
-  if (!svg) return;
-  const str = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([str], {type: 'image/svg+xml'});
-  window.open(URL.createObjectURL(blob), '_blank');
+  const container = els.mermaidDiv.style.display !== 'none' ? els.mermaidDiv : els.d3Div;
+  const svgEl = container.querySelector('svg');
+  if (svgEl) {
+    const str = new XMLSerializer().serializeToString(svgEl);
+    const blob = new Blob([str], {type: 'image/svg+xml'});
+    window.open(URL.createObjectURL(blob), '_blank');
+  }
 };
 
 els.downloadBtn.onclick = async () => {
+  // Same export logic as before – targets the active container
   const format = document.querySelector('input[name="exportFormat"]:checked')?.value || 'png';
   const topic = els.topic.value.trim().replace(/[^a-z0-9\u0B80-\u0DFF]+/gi,'-').toLowerCase() || 'diagram';
-
   els.loader.style.display = 'block';
 
   try {
-    const canvas = await html2canvas(els.mermaidDiv, {
-      scale: 3,
-      backgroundColor: '#ffffff',
-      logging: false
-    });
-
+    const targetDiv = els.mermaidDiv.style.display !== 'none' ? els.mermaidDiv : els.d3Div;
+    const canvas = await html2canvas(targetDiv, { scale: 3, backgroundColor: '#ffffff' });
     const dataURL = canvas.toDataURL('image/png');
 
     if (format === 'png') {
@@ -496,13 +420,9 @@ els.downloadBtn.onclick = async () => {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const w = 190;
       let h = canvas.height * w / canvas.width;
-
       pdf.setFontSize(18);
       pdf.text(els.topic.value.trim(), 105, 18, { align: 'center' });
-
-      const margin = 10;
-      const maxH = 277;
-
+      const margin = 10; const maxH = 277;
       if (h <= maxH) {
         pdf.addImage(dataURL, 'PNG', margin, 30, w, h);
       } else {
@@ -510,12 +430,10 @@ els.downloadBtn.onclick = async () => {
         pdf.addPage();
         pdf.addImage(dataURL, 'PNG', margin, 30 - maxH, w, h);
       }
-
       pdf.save(`chartgen-${topic}.pdf`);
     }
   } catch (e) {
-    console.error(e);
-    alert(currentLang==='en' ? "Export failed" : "பதிவிறக்கம் தோல்வியடைந்தது");
+    alert(currentLang==='en' ? "Export failed" : "பதிவிறக்கம் தோல்வி");
   } finally {
     els.loader.style.display = 'none';
   }
