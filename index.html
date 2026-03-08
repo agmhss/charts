@@ -227,12 +227,30 @@ els.generateBtn.addEventListener('click', async () => {
     // Mermaid generation
     let typeInstruction = rawType;
     if (rawType === 'flowchart') typeInstruction = 'flowchart LR or TD';
+     let typeInstruction = rawType;
+    if (rawType === 'infographics') typeInstruction = 'infographics LR or TD';
 
     const langInstruction = currentLang === 'ta'
       ? "All labels MUST be in தமிழ் மொழி. Use relevant emoji icons (e.g. 👁️, 📊) to make it visual."
       : "All labels MUST be in English. Use relevant emoji icons (e.g. 👁️, 📊) to make it visual.";
 
-    const prompt = `You are an expert educational diagram creator.
+    const prompt = `You are an expert educational diagram creator. Create an infographic image of [OBJECT], combining a realistic photograph or photoreal render of the object with technical annotation overlays placed directly on top.
+Use black ink-style line drawings and text (technical pen / architectural sketch look) on a pure white studio background, including:
+• Key component labels
+•Internal cutaway or exploded-view outlines
+•Measurements, dimensions, and scale markers
+•Material callouts and quantities
+•Arrows indicating function, force, or flow (air, sound, power, pressure)
+•Simple schematic or sectional diagrams where relevant
+Place the title [OBJECT] inside a hand-drawn technical annotation box in one corner.
+Style & layout rules:
+•The real object remains clearly visible beneath the annotations
+•Annotations feel sketched, technical, and architectural
+•Clean composition with balanced negative space
+•Educational, museum-exhibit / engineering-manual vibe
+Visual style: Minimal technical illustration aesthetic, black linework over realistic imagery, precise but slightly hand-drawn feel.
+Color palette: White background, black annotation lines and text only. No colors.
+Output: 1080x1080, ultra-crisp, social-feed optimized, no watermark.”
 Create ONLY valid Mermaid code – nothing else.
 Start directly with diagram keyword.
 Topic: "${topic}"
@@ -321,6 +339,9 @@ async function generateD3Diagram(topic, type, lang) {
       .text(label);
   } else {
     // infographic & exploded view base
+
+Prompt: Product design, [object or vehicle with material ac-cents], exploded view diagram, white background, three-dimensional, highly detailed internal components, studio lighting, product photography,
+best quality.
     const rootLabel = lang === 'ta' ? `${topic} (மையம்)` : `${topic} (Center)`;
     nodes = [
       { id: "root", label: rootLabel, group: 1, fx: width/2, fy: height/2 },
