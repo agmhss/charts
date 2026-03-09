@@ -139,7 +139,7 @@
 
       <div class="form-group">
         <label id="topicLabel" data-en="Object / Topic" data-ta="பொருள் / தலைப்பு">Object / Topic</label>
-        <input type="text" id="contentInput" value="Human Eye"
+        <input type="text" id="contentInput" value="மனித இதயம்"
                data-en-placeholder="e.g. Human heart, Electric motor, Leaf anatomy"
                data-ta-placeholder="எ.கா. மனித இதயம், மின்மோட்டார், இலை அமைப்பு"
                placeholder="e.g. Human heart, Electric motor, Leaf anatomy" />
@@ -199,9 +199,7 @@
   </div>
 
   <script>
-    // ───────────────────────────────────────────────
     // Mermaid config
-    // ───────────────────────────────────────────────
     mermaid.initialize({
       startOnLoad: false,
       securityLevel: 'loose',
@@ -210,9 +208,7 @@
       mindmap: { useMaxWidth: false }
     });
 
-    // ───────────────────────────────────────────────
     // Language handling
-    // ───────────────────────────────────────────────
     const Language = {
       current: 'en',
       toggle() {
@@ -234,9 +230,7 @@
     document.getElementById('langToggle').addEventListener('click', () => Language.toggle());
     Language.toggle(); // init
 
-    // ───────────────────────────────────────────────
     // UI elements
-    // ───────────────────────────────────────────────
     const UI = {
       groqKey: document.getElementById('groqKey'),
       topic: document.getElementById('contentInput'),
@@ -255,9 +249,7 @@
 
     let currentType = null;
 
-    // ───────────────────────────────────────────────
     // Helpers
-    // ───────────────────────────────────────────────
     function showLoader(show) { UI.loader.style.display = show ? 'block' : 'none'; }
     function enableDownload(enable) { UI.downloadBtn.disabled = !enable; }
     function disableUI(dis) {
@@ -290,9 +282,7 @@
       return div.innerHTML;
     }
 
-    // ───────────────────────────────────────────────
-    // Mermaid render – improved error handling
-    // ───────────────────────────────────────────────
+    // Mermaid render
     async function renderMermaid(code) {
       if (!code?.trim()) {
         UI.mermaidDiv.innerHTML = '<div style="padding:40px;color:#666;text-align:center;">(No code)</div>';
@@ -329,64 +319,115 @@
       }
     }
 
-    // ───────────────────────────────────────────────
-    // Labeled parts – D3 simple illustration
-    // ───────────────────────────────────────────────
-    async function renderLabeledParts(topic, parts) {
-    async function renderLabeledParts(topic, parts) {
-    showLayout(true);
-    showContainer('d3-container');
-    UI.d3Div.innerHTML = '';
+    // Best labeled diagram from Wikimedia (language-aware)
+    async function getBestLabeledDiagramUrl(topic) {
+      const isTamil = Language.current === 'ta';
 
-   if (parts && parts.length >= 4) {   // ← இதை comment பண்ணுங்க temporarily
-    //     // D3 code
-    // } else {
+      let primaryQueries = isTamil ? [
+        `${topic} தமிழ் லேபிள் வரைபடம் svg`,
+        `${topic} தமிழ் labeled diagram svg`,
+        `${topic} தமிழ் schematic diagram`,
+        `${topic} தமிழ் அறிவியல் வரைபடம்`
+      ] : [
+        `${topic} labeled diagram svg`,
+        `${topic} labelled anatomy diagram svg`,
+        `${topic} cross section labeled diagram svg`,
+        `${topic} schematic labeled diagram`
+      ];
 
-    UI.d3Div.innerHTML = '<div class="loader" style="margin:140px auto;"></div>';
-        const result = await getBestLabeledDiagramUrl(topic);
+      let fallbackQueries = isTamil ? [
+        `${topic} labeled diagram svg`,
+        `${topic} anatomy diagram labelled`
+      ] : [
+        `${topic} தமிழ் லேபிள் வரைபடம் svg`,
+        `${topic} தமிழ் வரைபடம்`
+      ];
 
-        if (result && result.url) {
-            const isTamilDiagram = result.language === 'ta';
-            const langNote = isTamilDiagram 
-                ? 'தமிழ் லேபிள்களுடன்' 
-                : 'ஆங்கில லேபிள்களுடன் (தெளிவான வரைபடம்)';
+      const allQueries = [...primaryQueries, ...fallbackQueries];
 
-            UI.d3Div.innerHTML = `
-                <div style="text-align:center; padding:16px;">
-                    <img src="${result.url}" 
-                         alt="${topic} வரைபடம்" 
-                         style="max-width:100%; max-height:520px; object-fit:contain; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.08); background:white;">
-                    <div style="margin-top:12px; font-size:0.95rem; color:#374151;">
-                        ${topic} — ${langNote}<br>
-                        <small style="color:#6b7280;">Wikimedia Commons-இலிருந்து தானாக தேர்ந்தெடுக்கப்பட்டது</small>
-                    </div>
-                </div>`;
-            enableDownload(true);
-        } else {
-            UI.d3Div.innerHTML = `
-                <div style="padding:80px 20px; text-align:center; color:#6b7280; background:#f1f5f9; border-radius:12px;">
-                    <div style="font-size:1.1rem; margin-bottom:8px;">வரைபடம் கண்டுபிடிக்க முடியவில்லை 😔</div>
-                    <p>"${escapeHtml(topic)}" க்கு ஏற்ற labeled வரைபடம் தற்போது கிடைக்கவில்லை.</p>
-                    <small>வேறொரு தலைப்பை முயற்சிக்கவும் அல்லது Groq API-ஐ சரிபார்க்கவும்.</small>
-                </div>`;
+      for (let query of allQueries) {
+        try {
+          const searchUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=6&gsrnamespace=6&prop=imageinfo&iiprop=url|size|mime&format=json&origin=*`;
+
+          const response = await fetch(searchUrl);
+          if (!response.ok) continue;
+
+          const data = await response.json();
+          if (!data.query?.pages) continue;
+
+          const pages = Object.values(data.query.pages);
+
+          for (let page of pages) {
+            const info = page.imageinfo?.[0];
+            if (!info) continue;
+
+            const url = info.url;
+            const mime = info.mime || '';
+
+            if (url && (mime === 'image/svg+xml' || mime.startsWith('image/')) && info.width > 400) {
+              return {
+                url: url,
+                language: query.includes('தமிழ்') || query.includes('tamil') ? 'ta' : 'en'
+              };
+            }
+          }
+        } catch (err) {
+          console.warn(`Search failed for: ${query}`, err);
         }
+      }
+
+      return null;
     }
-}
+
+    // Render labeled parts with fallback to Wikimedia image
+    async function renderLabeledParts(topic, parts) {
+      showLayout(true);
+      showContainer('d3-container');
+      UI.d3Div.innerHTML = '';
+
+      if (parts && parts.length >= 4) {
+        // Your custom D3 diagram logic here (if you want to keep it)
+        // For now, we skip to fallback if you commented it out
+        // If you have D3 code, paste it here
+      }
+
+      // Fallback image search (always run if no good parts)
+      UI.d3Div.innerHTML = '<div class="loader" style="margin:140px auto;"></div>';
+
+      const result = await getBestLabeledDiagramUrl(topic);
+
+      if (result && result.url) {
+        const langNote = result.language === 'ta' 
+          ? 'தமிழ் லேபிள்களுடன்' 
+          : 'ஆங்கில லேபிள்களுடன்';
+
+        UI.d3Div.innerHTML = `
+          <div style="text-align:center; padding:16px;">
+            <img src="${result.url}" 
+                 alt="${topic} வரைபடம்" 
+                 style="max-width:100%; max-height:520px; object-fit:contain; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.08); background:white;">
+            <div style="margin-top:12px; font-size:0.95rem; color:#374151;">
+              ${topic} — ${langNote}<br>
+              <small style="color:#6b7280;">Wikimedia Commons</small>
+            </div>
+          </div>`;
+        enableDownload(true);
+      } else {
+        UI.d3Div.innerHTML = `
+          <div style="padding:80px 20px; text-align:center; color:#6b7280; background:#f1f5f9; border-radius:12px;">
+            <div style="font-size:1.1rem; margin-bottom:8px;">வரைபடம் கிடைக்கவில்லை 😔</div>
+            <p>"${escapeHtml(topic)}" க்கு ஏற்ற labeled வரைபடம் தற்போது கிடைக்கவில்லை.</p>
+            <small>Groq API response-ஐ சரிபார்க்கவும் அல்லது வேறு topic try செய்யவும்.</small>
+          </div>`;
+      }
+    }
 
     function highlightPart(idx) {
+      // If you have D3 anchors, keep this; otherwise empty
       const anchors = UI.d3Div.__anchors || [];
       const svg = UI.d3Div.__svg;
       if (!svg) return;
-
-      svg.selectAll('line').attr('stroke', (d,i) => i === idx ? '#ef4444' : '#64748b').attr('stroke-width', (d,i) => i === idx ? 3 : 1.5);
-      svg.selectAll('circle').attr('fill', (d,i) => i === idx ? '#ef4444' : '#3b82f6');
-
-      const el = UI.partsDiv.querySelector(`[data-idx="${idx}"]`);
-      if (el) {
-        UI.partsDiv.querySelectorAll('.part-item').forEach(e => e.style.outline = 'none');
-        el.style.outline = '2px solid #60a5fa';
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
+      // ... your highlight code ...
     }
 
     function renderPartsPanel(topic, parts) {
@@ -414,92 +455,8 @@
         el.addEventListener('click', () => highlightPart(Number(el.dataset.idx)));
       });
     }
-async function getBestLabeledDiagramUrl(topic) {
-    const isTamil = Language.current === 'ta';
-    
-    // மொழிக்கு ஏற்ற primary queries (நல்ல quality-க்கு optimized)
-    let primaryQueries = isTamil ? [
-        `${topic} தமிழ் லேபிள் வரைபடம் svg`,
-        `${topic} தமிழ் labeled diagram`,
-        `${topic} தமிழில் வரைபடம் schematic`,
-        `${topic} தமிழ் அறிவியல் வரைபடம்`,
-        `${topic} தமிழ் லேபிள்கள் உடன்`
-    ] : [
-        `${topic} labeled diagram svg`,
-        `${topic} labelled anatomy diagram`,
-        `${topic} cross section labeled diagram`,
-        `${topic} schematic diagram labelled`,
-        `${topic} educational labeled diagram wikimedia`
-    ];
 
-    // fallback queries (மற்ற மொழி)
-    let fallbackQueries = isTamil ? [
-        `${topic} labeled diagram svg`,
-        `${topic} labelled anatomy diagram`,
-        `${topic} cross section labeled diagram`
-    ] : [
-        `${topic} தமிழ் லேபிள் வரைபடம்`,
-        `${topic} தமிழ் வரைபடம் svg`
-    ];
-
-    const allQueries = [...primaryQueries, ...fallbackQueries];
-
-    for (let query of allQueries) {
-        try {
-            const searchUrl = `https://commons.wikimedia.org/w/api.php?` +
-                `action=query&` +
-                `generator=search&` +
-                `gsrsearch=${encodeURIComponent(query)}&` +
-                `gsrlimit=6&` +
-                `gsrnamespace=6&` +          // File namespace
-                `prop=imageinfo&` +
-                `iiprop=url|size|mime&` +    // mime type-ஐ check பண்ணலாம்
-                `format=json&` +
-                `origin=*`;
-
-            const response = await fetch(searchUrl);
-            if (!response.ok) continue;
-
-            const data = await response.json();
-            if (!data.query?.pages) continue;
-
-            const pages = Object.values(data.query.pages);
-
-            for (let page of pages) {
-                const info = page.imageinfo?.[0];
-                if (!info) continue;
-
-                const url = info.url;
-                const mime = info.mime || '';
-
-                // SVG மட்டும் + reasonable size
-                if (url && mime === 'image/svg+xml' && info.size > 5000) {
-                    return {
-                        url: url,
-                        language: query.includes('தமிழ்') || query.includes('tamil') ? 'ta' : 'en',
-                        queryUsed: query
-                    };
-                }
-
-                // SVG இல்லைனாலும் PNG/JPG ஆனாலும் acceptable ஆனா quality இருந்தா
-                if (url && (mime.startsWith('image/')) && info.width > 400 && info.height > 300) {
-                    return {
-                        url: url,
-                        language: query.includes('தமிழ்') || query.includes('tamil') ? 'ta' : 'en',
-                        queryUsed: query
-                    };
-                }
-            }
-        } catch (err) {
-            console.warn(`Query failed: ${query}`, err);
-        }
-    }
-
-    return null;
-}
-    // ───────────────────────────────────────────────
-    // Groq helpers
-    // ───────────────────────────────────────────────
+    // Groq call
     async function callGroq(system, user) {
       const key = UI.groqKey.value.trim();
       if (!key) throw new Error("No API key");
@@ -521,73 +478,70 @@ async function getBestLabeledDiagramUrl(topic) {
         })
       });
 
-      if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(`Groq HTTP ${res.status} - ${errText}`);
+      }
+
       const data = await res.json();
       return data.choices?.[0]?.message?.content || '';
     }
 
+    // Generate parts with robust JSON parsing
     async function generateParts(topic) {
       const lang = Language.current === 'ta' ? 'Tamil' : 'English';
-      const system = `Output **only** clean JSON. No markdown, no explanation.`;
+      const system = `Output STRICT clean JSON only. No markdown, no extra text.`;
       const user = `Topic: "${topic}"
 Language: ${lang}
-Return JSON:
+Return ONLY this JSON structure:
 {
   "title": "short title",
   "parts": [
-    {"name": "...", "description": "1-2 short sentences"}
+    {"name": "part name", "description": "1-2 short sentences"}
   ]
 }
-Rules:
-- 7–12 parts
-- Student-friendly names
-- Short, clear descriptions`;
+Rules: 7–12 parts, student-friendly, short descriptions.`;
 
-  
+      const raw = await callGroq(system, user);
+      let text = stripFences(raw);
 
-    const raw = await callGroq(system, user);
-    let text = stripFences(raw);
+      // Aggressive cleaning
+      text = text.replace(/```json|```/g, '').trim();
+      text = text.replace(/^[^ {]*{/, '{').replace(/}[^}]*$/, '}');
 
-    // Extra cleaning for common AI mistakes
-    text = text.replace(/```json
-    text = text.replace(/^[\s\S]*?\{/, '{');  // remove anything before first {
-    text = text.replace(/\}[^\}]*$/, '}');   // remove after last }
-
-    let json;
-    try {
+      let json;
+      try {
         json = JSON.parse(text);
-    } catch (e) {
-        console.error("JSON parse failed. Raw text:", text);
-        throw new Error("Invalid JSON from model - check console for raw response");
-    }
+      } catch (e) {
+        console.error("JSON parse error. Raw cleaned text:", text);
+        console.error("Original raw:", raw);
+        throw new Error("Model returned invalid JSON - see console");
+      }
 
-    const parts = (json.parts || []).map(p => ({
+      const parts = (json.parts || []).map(p => ({
         name: String(p.name || '').trim(),
         description: String(p.description || '').trim()
-    })).filter(p => p.name);
+      })).filter(p => p.name);
 
-    if (parts.length === 0) throw new Error("No parts generated");
+      if (parts.length === 0) throw new Error("No valid parts generated");
 
-    return { title: json.title || topic, parts };
-}
+      return { title: json.title || topic, parts };
     }
 
     async function generateMermaid(topic, type) {
       const langInst = Language.current === 'ta'
-        ? "All labels in Tamil. Use simple Tamil words suitable for school students."
-        : "All labels in English. Use clear, educational language.";
+        ? "All labels in Tamil. Use simple Tamil words for school students."
+        : "All labels in English. Clear educational language.";
 
-      const prompt = `Create valid Mermaid ${type} code ONLY about "${topic}".
+      const prompt = `Create ONLY valid Mermaid ${type} code for "${topic}".
 ${langInst}
-Start directly with diagram type keyword (graph TD, mindmap, etc.).
-No explanation, no \`\`\` fences.`;
+Start with diagram keyword (graph TD, mindmap, etc.).
+No explanations, no fences.`;
 
-      let code = await callGroq("You are a Mermaid diagram expert. Output only valid code.", prompt);
-      code = stripFences(code);
+      let code = await callGroq("Mermaid expert. Output valid code only.", prompt);
+      code = stripFences(code).replace(/^mermaid\s*/i, '').trim();
 
-      // Common AI cleanup
-      code = code.replace(/^mermaid\s*/i, '').trim();
-      if (!code.includes('graph') && !code.includes('flowchart') && type === 'flowchart') {
+      if (type === 'flowchart' && !code.includes('flowchart') && !code.includes('graph')) {
         code = 'flowchart TD\n' + code;
       }
 
@@ -595,9 +549,7 @@ No explanation, no \`\`\` fences.`;
       await renderMermaid(code);
     }
 
-    // ───────────────────────────────────────────────
-    // Main generate
-    // ───────────────────────────────────────────────
+    // Main generate function
     async function generate() {
       const key = UI.groqKey.value.trim();
       const topic = UI.topic.value.trim();
@@ -608,7 +560,6 @@ No explanation, no \`\`\` fences.`;
       if (!type) return Language.alert("Select type", "வகை தேர்வு செய்யவும்");
 
       localStorage.setItem('groqKey', key);
-
       currentType = type;
       showLoader(true);
       disableUI(true);
@@ -622,27 +573,25 @@ No explanation, no \`\`\` fences.`;
       try {
         if (type === 'labeledParts') {
           const { title, parts } = await generateParts(topic);
-          renderLabeledParts(title, parts);
+          await renderLabeledParts(title, parts);
           renderPartsPanel(title, parts);
           setTimeout(() => highlightPart(0), 300);
         } else {
           await generateMermaid(topic, type);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Generation error:", err);
         UI.mermaidDiv.innerHTML = `<div class="error-box"><strong>Error:</strong><br>${escapeHtml(err.message)}</div>`;
         showLayout(true);
         showContainer('mermaid-container');
-        Language.alert("Failed – check console", "தோல்வி – console பார்க்கவும்");
+        Language.alert("Failed – check console for details", "தோல்வி – console பார்க்கவும்");
       } finally {
         showLoader(false);
         disableUI(false);
       }
     }
 
-    // ───────────────────────────────────────────────
     // Event listeners
-    // ───────────────────────────────────────────────
     UI.generateBtn.addEventListener('click', generate);
 
     UI.renderBtn.addEventListener('click', async () => {
@@ -693,3 +642,4 @@ No explanation, no \`\`\` fences.`;
   </script>
 </body>
 </html>
+    
