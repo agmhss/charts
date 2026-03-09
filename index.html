@@ -223,6 +223,99 @@ function renderD3(topic, type, lang) {
   // Your existing D3 logic here...
   // (omitted for brevity – copy your working D3 code into this function)
   showContainer('d3-container');
+  async function generateD3Diagram(topic, type, lang) {
+  els.d3Div.innerHTML = '';
+
+  const width = 800;
+  const height = 500;
+  const font = lang === 'ta' ? "'Noto Sans Tamil', sans-serif" : "Roboto, sans-serif";
+
+  const svg = d3.select(els.d3Div)
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", height)
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("style", `max-width:100%; height:auto; font-family:${font};`);
+
+  let nodes = [];
+  let links = [];
+
+  if (type === 'pictograph') {
+    const quantity = 10;
+    const icon = lang === 'ta' ? '👨‍🎓' : '👤';
+    nodes = Array.from({length: quantity}, (_, i) => ({
+      id: `p${i}`,
+      emoji: icon
+    }));
+  } else {
+    nodes = [
+      { id: "root", label: topic, group: 1 },
+      { id: "a", label: lang==='ta'?"பகுதி 1":"Part 1", group: 2 },
+      { id: "b", label: lang==='ta'?"பகுதி 2":"Part 2", group: 2 },
+      { id: "c", label: lang==='ta'?"பகுதி 3":"Part 3", group: 2 }
+    ];
+    links = [
+      { source: "root", target: "a" },
+      { source: "root", target: "b" },
+      { source: "root", target: "c" }
+    ];
+  }
+
+  const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(120))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+  const link = svg.append("g")
+    .selectAll("line")
+    .data(links)
+    .join("line")
+    .attr("stroke", "#999")
+    .attr("stroke-opacity", 0.6);
+
+  const node = svg.append("g")
+    .selectAll("g")
+    .data(nodes)
+    .join("g")
+    .call(d3.drag()
+      .on("start", function(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      })
+      .on("drag", function(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      })
+      .on("end", function(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }));
+
+  node.append("circle")
+    .attr("r", 25)
+    .attr("fill", d => d.group === 1 ? "#1e40af" : "#60a5fa");
+
+  node.append("text")
+    .attr("dy", ".35em")
+    .attr("dx", 30)
+    .text(d => d.label || d.emoji || d.id);
+
+  simulation.on("tick", () => {
+    link
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+  });
+}
+Render edited (Mermaid only for now)
+// ────────────────────────────────────────────────
+els.renderEditedBtn.addEventListener('click', () => {
+  renderMermaid(els.codeEditor.value);
+});
 }
 
 // ============================================================================
@@ -271,7 +364,14 @@ Start directly with diagram keyword. No explanations, no markdown.`;
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        model: "llama-3.1-70b-versatile",     // ← try this first
+// or
+model: "mixtral-8x7b-32768",
+// or
+model: "gemma2-27b-it",
+        // or
         model: "llama3-70b-8192",
+          
         messages: [{ role: "user", content: prompt }],
         temperature: 0.2,
         max_tokens: 2200
