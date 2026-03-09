@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CHARTGEN PRO – கல்வி வரைபட உருவாக்கி</title>
+  <title>CHARTGEN PRO – Educational Diagram Creator</title>
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,38 +16,99 @@
     :root {
       --font-main: 'Roboto', 'Noto Sans Tamil', system-ui, sans-serif;
       --font-tamil: 'Noto Sans Tamil', sans-serif;
+      --brand: #1e40af;
+      --brand2: #2563eb;
+      --ok: #16a34a;
+      --muted: #6b7280;
     }
-    body { font-family: var(--font-main); background: #f8f9fa; margin: 0; padding: 20px; color: #333; }
-    .app-container { max-width: 860px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
-    .header { background: #1e40af; color: white; padding: 16px 24px; font-weight: 600; font-size: 1.3rem; display: flex; justify-content: space-between; align-items: center; }
-    .lang-toggle { background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500; }
+
+    * { box-sizing: border-box; }
+    body { font-family: var(--font-main); background: #f8f9fa; margin: 0; padding: 20px; color: #111827; }
+    .app-container { max-width: 920px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+    .header { background: var(--brand); color: white; padding: 16px 24px; font-weight: 600; font-size: 1.15rem; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .lang-toggle { background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+
     .section { padding: 24px; border-bottom: 1px solid #eee; }
-    .section-title { margin: 0 0 16px; font-size: 1.25rem; font-weight: 600; color: #1e40af; }
-    label { font-weight: 600; display: block; margin-bottom: 8px; color: #444; }
-    input[type=text], input[type=password] { width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
-    .form-group { margin-bottom: 20px; }
-    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 20px; margin-top: 8px; }
-    .preview-area { min-height: 400px; background: #f9fafb; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; margin: 16px 0; position: relative; overflow: auto; }
-    #mermaid-container, #d3-container { min-width: 100%; text-align: center; }
-    #mermaid-container svg text, #d3-container text { font-family: var(--font-main) !important; }
-    .loader { border: 5px solid #e5e7eb; border-top: 5px solid #3b82f6; border-radius: 50%; width: 42px; height: 42px; animation: spin 1s linear infinite; margin: 100px auto; }
+    .section-title { margin: 0 0 16px; font-size: 1.1rem; font-weight: 800; color: var(--brand); }
+    label { font-weight: 700; display: block; margin-bottom: 8px; color: #374151; }
+    input[type=text], input[type=password] { width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
+    .form-group { margin-bottom: 18px; }
+
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 16px; margin-top: 8px; }
+    .radio-label { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; border-radius: 10px; border: 1px solid #e5e7eb; transition: background 0.2s, border-color 0.2s; }
+    .radio-label:hover { background: #f0f9ff; border-color: #bfdbfe; }
+    .radio-label input[type="radio"] { margin: 0; width: auto; }
+
+    .preview-area {
+      min-height: 460px;
+      background: #f9fafb;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 16px 0;
+      position: relative;
+      overflow: auto;
+    }
+
+    .preview-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .preview-layout { grid-template-columns: 1fr; }
+    }
+
+    #mermaid-container, #d3-container, #parts-container { display: none; }
+    #mermaid-container svg text, #d3-container text, #parts-container { font-family: var(--font-main) !important; }
+
+    .parts-panel {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .parts-title { font-weight: 900; color: #111827; margin: 0 0 10px; }
+    .parts-subtitle { margin: 0 0 14px; color: #6b7280; font-size: 0.95rem; }
+    .parts-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    .part-item { border: 1px solid #eef2ff; background: #f8fafc; border-radius: 10px; padding: 10px 10px; cursor: pointer; }
+    .part-item:hover { border-color: #bfdbfe; background: #eff6ff; }
+    .part-row { display: flex; gap: 10px; align-items: baseline; }
+    .badge {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      background: #dbeafe;
+      color: var(--brand);
+      font-size: 0.9rem;
+    }
+    .part-name { font-weight: 900; color: #0f172a; }
+    .part-desc { margin: 6px 0 0; color: #374151; font-size: 0.95rem; line-height: 1.35; }
+
+    .loader { border: 5px solid #e5e7eb; border-top: 5px solid #3b82f6; border-radius: 50%; width: 42px; height: 42px; animation: spin 1s linear infinite; margin: 120px auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
-    button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: background 0.2s; }
-    .primary { background: #2563eb; color: white; }
+
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0 0; }
+    button { padding: 10px 18px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.95rem; transition: transform 0.02s, background 0.2s, opacity 0.2s; }
+    button:active { transform: translateY(1px); }
+    .primary { background: var(--brand2); color: white; }
     .primary:hover { background: #1d4ed8; }
-    .success { background: #16a34a; color: white; }
+    .success { background: var(--ok); color: white; }
     .success:hover { background: #15803d; }
-    .secondary { background: #6b7280; color: white; }
+    .secondary { background: var(--muted); color: white; }
     .secondary:hover { background: #4b5563; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .code-editor { width: 100%; height: 200px; font-family: Consolas, monospace; font-size: 14px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; background: #f8fafc; margin: 12px 0; box-sizing: border-box; }
+
+    .code-editor { width: 100%; height: 190px; font-family: Consolas, monospace; font-size: 14px; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; resize: vertical; background: #f8fafc; margin: 12px 0 0; }
     .lang-tamil body, .lang-tamil label, .lang-tamil .section-title, .lang-tamil button { font-family: var(--font-tamil); }
     .lang-tamil input::placeholder { font-family: var(--font-tamil); }
-    #d3-container svg { max-width: 100%; height: auto; }
-    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background 0.2s; }
-    .radio-label:hover { background: #f0f9ff; }
-    .radio-label input[type="radio"] { margin: 0; width: auto; }
+
+    .hint { color: #6b7280; font-size: 0.95rem; margin: 8px 0 0; }
   </style>
 </head>
 
@@ -69,40 +130,47 @@
       </div>
 
       <div class="form-group">
-        <label id="topicLabel" data-en="Topic / Concept" data-ta="தலைப்பு / கருத்து">Topic / Concept</label>
+        <label id="topicLabel" data-en="Object / Topic (type what you want to see)" data-ta="பொருள் / தலைப்பு (நீங்கள் பார்க்க விரும்புவது)">Object / Topic</label>
         <input type="text"
                id="contentInput"
-               value="Human Eye Anatomy"
-               data-en-placeholder="e.g. Photosynthesis process"
-               data-ta-placeholder="எ.கா. ஒளிச்சேர்க்கை செயல்முறை"
-               placeholder="e.g. Photosynthesis process" />
+               value="Human Eye"
+               data-en-placeholder="e.g. Human heart, Electric motor, Leaf anatomy, Cell organelles"
+               data-ta-placeholder="எ.கா. மனித இதயம், மின்மோட்டார், இலை அமைப்பு, செல் உறுப்புகள்"
+               placeholder="e.g. Human heart, Electric motor, Leaf anatomy, Cell organelles" />
+        <p class="hint" data-en="Tip: choose “Detailed labeled parts (image)” for a detailed preview." data-ta="குறிப்பு: விரிவான முன்னோட்டத்திற்கு “விரிவான பகுதி லேபிள்கள் (படம்)” தேர்வு செய்க.">
+          Tip: choose “Detailed labeled parts (image)” for a detailed preview.
+        </p>
       </div>
 
       <div class="form-group">
         <label id="typeLabel" data-en="Diagram Type" data-ta="வரைபட வகை">Diagram Type</label>
         <div class="chart-grid">
-          <label class="radio-label"><input type="radio" name="chartType" value="flowchart" checked> <span data-en="Flowchart / Process" data-ta="பாய்வு வரைபடம் / செயல்முறை">Flowchart / Process</span></label>
+          <label class="radio-label"><input type="radio" name="chartType" value="labeledParts" checked> <span data-en="Detailed labeled parts (image)" data-ta="விரிவான பகுதி லேபிள்கள் (படம்)">Detailed labeled parts (image)</span></label>
+          <label class="radio-label"><input type="radio" name="chartType" value="flowchart"> <span data-en="Flowchart / Process" data-ta="பாய்வு வரைபடம் / செயல்முறை">Flowchart / Process</span></label>
           <label class="radio-label"><input type="radio" name="chartType" value="mindmap"> <span data-en="Mind Map" data-ta="மன வரைபடம்">Mind Map</span></label>
           <label class="radio-label"><input type="radio" name="chartType" value="sequenceDiagram"> <span data-en="Sequence Diagram" data-ta="தொடர் வரைபடம்">Sequence Diagram</span></label>
           <label class="radio-label"><input type="radio" name="chartType" value="classDiagram"> <span data-en="Class / Entity Diagram" data-ta="வகுப்பு / பொருள் வரைபடம்">Class / Entity Diagram</span></label>
           <label class="radio-label"><input type="radio" name="chartType" value="timeline"> <span data-en="Timeline" data-ta="காலவரிசை">Timeline</span></label>
-          <label class="radio-label"><input type="radio" name="chartType" value="pie"> <span data-en="Pie Chart" data-ta="வட்ட வரைபடம்">Pie Chart</span></label>
-          <label class="radio-label"><input type="radio" name="chartType" value="infographic"> <span data-en="Infographic" data-ta="தகவல் வரைபடம்">Infographic</span></label>
-          <label class="radio-label"><input type="radio" name="chartType" value="pictograph"> <span data-en="Pictograph" data-ta="படக்குறியீட்டு வரைபடம்">Pictograph</span></label>
-          <label class="radio-label"><input type="radio" name="chartType" value="explodedview"> <span data-en="Exploded View" data-ta="விரிந்த பார்வை">Exploded View</span></label>
+          <label class="radio-label"><input type="radio" name="chartType" value="pie"> <span data-en="Pie Chart (example)" data-ta="வட்ட வரைபடம் (உதாரணம்)">Pie Chart (example)</span></label>
         </div>
       </div>
 
-      <button class="primary" id="generateBtn" data-en="Generate Diagram" data-ta="வரைபடத்தை உருவாக்கு">Generate Diagram</button>
+      <button class="primary" id="generateBtn" data-en="Generate" data-ta="உருவாக்கு">Generate</button>
     </div>
 
     <div class="section">
-      <div class="section-title" id="sec2Title" data-en="2. Preview & Edit Code" data-ta="2. முன்னோட்டம் & குறியீட்டை திருத்து">2. Preview & Edit Code</div>
+      <div class="section-title" id="sec2Title" data-en="2. Preview" data-ta="2. முன்னோட்டம்">2. Preview</div>
 
       <div class="preview-area" id="previewArea">
         <div class="loader" id="loader" style="display:none"></div>
-        <div id="mermaid-container" style="display:none;"></div>
-        <div id="d3-container" style="display:none;"></div>
+
+        <div class="preview-layout" id="previewLayout" style="display:none">
+          <div>
+            <div id="mermaid-container"></div>
+            <div id="d3-container"></div>
+          </div>
+          <div id="parts-container" class="parts-panel"></div>
+        </div>
       </div>
 
       <textarea class="code-editor" id="mermaidCodeEditor" placeholder="Mermaid code appears here... (for Mermaid types)"></textarea>
@@ -122,7 +190,7 @@
       </div>
 
       <div class="controls">
-        <button class="success" id="downloadBtn" disabled data-en="Download File" data-ta="கோப்பை பதிவிறக்கு">Download File</button>
+        <button class="success" id="downloadBtn" disabled data-en="Download" data-ta="பதிவிறக்கு">Download</button>
       </div>
     </div>
   </div>
@@ -131,7 +199,7 @@
     mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
 
     // ============================================================================
-    // 1. UI & Language Module
+    // 1. Language
     // ============================================================================
     const Language = {
       current: 'en',
@@ -139,7 +207,6 @@
       toggle() {
         this.current = this.current === 'en' ? 'ta' : 'en';
         document.body.className = this.current === 'en' ? 'lang-english' : 'lang-tamil';
-
         document.getElementById('langToggle').textContent = this.current === 'en' ? 'தமிழ்' : 'English';
 
         document.querySelectorAll('[data-en]').forEach(el => {
@@ -167,24 +234,26 @@
     Language.toggle();
 
     // ============================================================================
-    // 2. DOM Elements Cache
+    // 2. UI cache
     // ============================================================================
     const UI = {
-      groqKey:     document.getElementById('groqKey'),
-      topicInput:  document.getElementById('contentInput'),
+      groqKey: document.getElementById('groqKey'),
+      topicInput: document.getElementById('contentInput'),
       generateBtn: document.getElementById('generateBtn'),
-      renderBtn:   document.getElementById('renderEditedBtn'),
-      enlargeBtn:  document.getElementById('enlargeBtn'),
+      renderBtn: document.getElementById('renderEditedBtn'),
+      enlargeBtn: document.getElementById('enlargeBtn'),
       downloadBtn: document.getElementById('downloadBtn'),
-      loader:      document.getElementById('loader'),
-      mermaidDiv:  document.getElementById('mermaid-container'),
-      d3Div:       document.getElementById('d3-container'),
-      codeEditor:  document.getElementById('mermaidCodeEditor'),
-      previewArea: document.getElementById('previewArea')
+      loader: document.getElementById('loader'),
+      mermaidDiv: document.getElementById('mermaid-container'),
+      d3Div: document.getElementById('d3-container'),
+      partsDiv: document.getElementById('parts-container'),
+      previewArea: document.getElementById('previewArea'),
+      previewLayout: document.getElementById('previewLayout'),
+      codeEditor: document.getElementById('mermaidCodeEditor')
     };
 
     // ============================================================================
-    // 3. State & Helpers
+    // 3. helpers
     // ============================================================================
     let currentDiagramType = null;
 
@@ -208,9 +277,14 @@
       return el ? el.value : null;
     }
 
+    function showPreviewLayout(show) {
+      UI.previewLayout.style.display = show ? 'grid' : 'none';
+    }
+
     function showContainer(containerId) {
       UI.mermaidDiv.style.display = 'none';
       UI.d3Div.style.display = 'none';
+      UI.partsDiv.style.display = 'none';
       if (containerId) document.getElementById(containerId).style.display = 'block';
     }
 
@@ -218,119 +292,298 @@
       return !!UI.previewArea.querySelector('svg');
     }
 
+    function safeJsonParse(text) {
+      try { return JSON.parse(text); } catch (_) { return null; }
+    }
+
+    function stripCodeFences(text) {
+      if (!text) return '';
+      return text
+        .replace(/^```(?:json|mermaid)?\s*/i, '')
+        .replace(/```$/g, '')
+        .trim();
+    }
+
+    function normalizeParts(rawParts) {
+      const parts = Array.isArray(rawParts) ? rawParts : [];
+      return parts
+        .map(p => ({
+          name: String(p?.name ?? '').trim(),
+          description: String(p?.description ?? '').trim()
+        }))
+        .filter(p => p.name.length > 0)
+        .slice(0, 14);
+    }
+
     // ============================================================================
-    // 4. Renderers
+    // 4. Rendering: Mermaid
     // ============================================================================
     async function renderMermaid(code) {
       if (!code || !code.trim()) return;
-
       try {
         UI.mermaidDiv.innerHTML = '';
         const id = 'mermaid-' + Date.now();
         const { svg } = await mermaid.render(id, code);
         UI.mermaidDiv.innerHTML = svg;
+        showPreviewLayout(true);
         showContainer('mermaid-container');
+        UI.partsDiv.innerHTML = '';
         setDownloadEnabled(true);
       } catch (err) {
         UI.mermaidDiv.innerHTML =
-          `<pre style="color:#c00; white-space:pre-wrap;">${String(err && err.message ? err.message : err)}\n\n${code}</pre>`;
+          `<pre style="color:#c00; white-space:pre-wrap;">${String(err?.message ?? err)}\n\n${code}</pre>`;
+        showPreviewLayout(true);
         showContainer('mermaid-container');
         setDownloadEnabled(false);
       }
     }
 
-    function renderD3(topic, type, lang) {
+    // ============================================================================
+    // 5. Rendering: “Detailed labeled parts (image)” (SVG + parts panel)
+    // ============================================================================
+    function renderPartsPanel(topic, parts) {
+      const title = Language.current === 'ta' ? 'பாகங்கள்' : 'Parts';
+      const subtitle = Language.current === 'ta'
+        ? `"${topic}" — பகுதிகள் மற்றும் விளக்கம்`
+        : `"${topic}" — parts and explanations`;
+
+      UI.partsDiv.innerHTML = `
+        <div class="parts-title">${title}</div>
+        <div class="parts-subtitle">${subtitle}</div>
+        <ul class="parts-list">
+          ${parts.map((p, i) => `
+            <li class="part-item" data-part-index="${i}">
+              <div class="part-row">
+                <span class="badge">${i + 1}</span>
+                <span class="part-name">${escapeHtml(p.name)}</span>
+              </div>
+              <p class="part-desc">${escapeHtml(p.description || '')}</p>
+            </li>
+          `).join('')}
+        </ul>
+      `;
+      UI.partsDiv.style.display = 'block';
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str ?? '';
+      return div.innerHTML;
+    }
+
+    function renderLabeledPartsSVG(topic, parts) {
+      showPreviewLayout(true);
       showContainer('d3-container');
       UI.d3Div.innerHTML = '';
 
-      const width = 800;
-      const height = 500;
-      const font = lang === 'ta' ? "'Noto Sans Tamil', sans-serif" : "Roboto, sans-serif";
+      const width = 860;
+      const height = 520;
+      const leftX = 80;
+      const rightX = width - 60;
+      const centerX = Math.round(width * 0.44);
+      const centerY = Math.round(height * 0.52);
 
       const svg = d3.select(UI.d3Div)
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", height)
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .attr("style", `max-width:100%; height:auto; font-family:${font};`);
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', height)
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('style', 'max-width:100%; height:auto;');
 
-      let nodes = [];
-      let links = [];
+      // Background title
+      svg.append('text')
+        .attr('x', 18)
+        .attr('y', 34)
+        .attr('fill', '#0f172a')
+        .attr('font-weight', 900)
+        .attr('font-size', 18)
+        .text(topic);
 
-      if (type === 'pictograph') {
-        const quantity = 10;
-        const icon = lang === 'ta' ? '👨‍🎓' : '👤';
-        nodes = Array.from({ length: quantity }, (_, i) => ({ id: `p${i}`, emoji: icon }));
-      } else {
-        nodes = [
-          { id: "root", label: topic, group: 1 },
-          { id: "a", label: lang === 'ta' ? "பகுதி 1" : "Part 1", group: 2 },
-          { id: "b", label: lang === 'ta' ? "பகுதி 2" : "Part 2", group: 2 },
-          { id: "c", label: lang === 'ta' ? "பகுதி 3" : "Part 3", group: 2 }
-        ];
-        links = [
-          { source: "root", target: "a" },
-          { source: "root", target: "b" },
-          { source: "root", target: "c" }
-        ];
-      }
+      // Generic “object” illustration (silhouette-like) so it works for any topic
+      const blob = svg.append('g').attr('opacity', 1);
+      blob.append('defs').append('linearGradient')
+        .attr('id', 'objGrad')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '100%')
+        .selectAll('stop')
+        .data([
+          { o: '0%', c: '#93c5fd' },
+          { o: '60%', c: '#60a5fa' },
+          { o: '100%', c: '#2563eb' }
+        ])
+        .join('stop')
+        .attr('offset', d => d.o)
+        .attr('stop-color', d => d.c);
 
-      const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(120))
-        .force("charge", d3.forceManyBody().strength(-300))
-        .force("center", d3.forceCenter(width / 2, height / 2));
+      // Soft “object” body
+      blob.append('path')
+        .attr('d', `
+          M ${centerX - 120} ${centerY - 160}
+          C ${centerX + 30} ${centerY - 220}, ${centerX + 190} ${centerY - 80}, ${centerX + 120} ${centerY + 40}
+          C ${centerX + 170} ${centerY + 190}, ${centerX - 20} ${centerY + 240}, ${centerX - 150} ${centerY + 150}
+          C ${centerX - 260} ${centerY + 80}, ${centerX - 260} ${centerY - 40}, ${centerX - 120} ${centerY - 160}
+          Z
+        `)
+        .attr('fill', 'url(#objGrad)')
+        .attr('opacity', 0.85);
 
-      const link = svg.append("g")
-        .selectAll("line")
-        .data(links)
-        .join("line")
-        .attr("stroke", "#999")
-        .attr("stroke-opacity", 0.6);
+      // Inner highlight
+      blob.append('ellipse')
+        .attr('cx', centerX - 25)
+        .attr('cy', centerY - 25)
+        .attr('rx', 90)
+        .attr('ry', 70)
+        .attr('fill', 'rgba(255,255,255,0.28)');
 
-      const node = svg.append("g")
-        .selectAll("g")
-        .data(nodes)
-        .join("g")
-        .call(d3.drag()
-          .on("start", function(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-          })
-          .on("drag", function(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-          })
-          .on("end", function(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-          }));
+      // Callouts
+      const anchorCount = Math.min(parts.length, 12);
+      const anchors = Array.from({ length: anchorCount }, (_, i) => {
+        const angle = (-Math.PI * 0.7) + (i / Math.max(1, anchorCount - 1)) * (Math.PI * 1.4);
+        const ax = centerX + Math.cos(angle) * 145;
+        const ay = centerY + Math.sin(angle) * 145;
 
-      node.append("circle")
-        .attr("r", 25)
-        .attr("fill", d => d.group === 1 ? "#1e40af" : "#60a5fa");
-
-      node.append("text")
-        .attr("dy", ".35em")
-        .attr("dx", 30)
-        .text(d => d.label || d.emoji || d.id);
-
-      simulation.on("tick", () => {
-        link
-          .attr("x1", d => d.source.x)
-          .attr("y1", d => d.source.y)
-          .attr("x2", d => d.target.x)
-          .attr("y2", d => d.target.y);
-        node.attr("transform", d => `translate(${d.x},${d.y})`);
+        const leftSide = i % 2 === 0;
+        const lx = leftSide ? leftX : rightX;
+        const ly = 80 + i * ((height - 130) / Math.max(1, anchorCount - 1));
+        return { i, ax, ay, lx, ly, leftSide };
       });
+
+      const calloutG = svg.append('g');
+
+      calloutG.selectAll('line.call')
+        .data(anchors)
+        .join('line')
+        .attr('class', 'call')
+        .attr('x1', d => d.ax)
+        .attr('y1', d => d.ay)
+        .attr('x2', d => d.lx)
+        .attr('y2', d => d.ly)
+        .attr('stroke', '#0f172a')
+        .attr('stroke-opacity', 0.25)
+        .attr('stroke-width', 2);
+
+      calloutG.selectAll('circle.anchor')
+        .data(anchors)
+        .join('circle')
+        .attr('class', 'anchor')
+        .attr('cx', d => d.ax)
+        .attr('cy', d => d.ay)
+        .attr('r', 7)
+        .attr('fill', '#0ea5e9')
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', 2);
+
+      // Number badges near label end
+      const labelG = calloutG.selectAll('g.label')
+        .data(anchors)
+        .join('g')
+        .attr('class', 'label')
+        .attr('transform', d => `translate(${d.lx}, ${d.ly})`)
+        .style('cursor', 'pointer')
+        .on('click', (_, d) => highlightPart(d.i));
+
+      labelG.append('circle')
+        .attr('cx', d => d.leftSide ? 0 : 0)
+        .attr('cy', 0)
+        .attr('r', 14)
+        .attr('fill', '#dbeafe')
+        .attr('stroke', '#93c5fd')
+        .attr('stroke-width', 1.5);
+
+      labelG.append('text')
+        .attr('x', 0)
+        .attr('y', 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-weight', 900)
+        .attr('fill', '#1e40af')
+        .text(d => d.i + 1);
+
+      labelG.append('text')
+        .attr('x', d => d.leftSide ? 22 : -22)
+        .attr('y', 6)
+        .attr('text-anchor', d => d.leftSide ? 'start' : 'end')
+        .attr('font-weight', 900)
+        .attr('fill', '#0f172a')
+        .attr('font-size', 12.5)
+        .text(d => (parts[d.i]?.name ?? '').slice(0, 26));
+
+      // store refs for highlighting
+      UI.d3Div.__anchors = anchors;
+      UI.d3Div.__parts = parts;
+      UI.d3Div.__svg = svg;
 
       setDownloadEnabled(true);
     }
 
+    function highlightPart(index) {
+      const anchors = UI.d3Div.__anchors || [];
+      const svg = UI.d3Div.__svg;
+      if (!svg) return;
+
+      svg.selectAll('line.call').attr('stroke-opacity', d => d.i === index ? 0.85 : 0.18).attr('stroke', d => d.i === index ? '#ef4444' : '#0f172a');
+      svg.selectAll('circle.anchor').attr('fill', d => d.i === index ? '#ef4444' : '#0ea5e9');
+
+      const item = UI.partsDiv.querySelector(`[data-part-index="${index}"]`);
+      if (item) item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      UI.partsDiv.querySelectorAll('.part-item').forEach(el => el.style.outline = 'none');
+      if (item) item.style.outline = '2px solid #93c5fd';
+    }
+
     // ============================================================================
-    // 5. API / Generation
+    // 6. Groq calls
     // ============================================================================
+    async function groqChatJSON(system, user) {
+      const key = UI.groqKey.value.trim();
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-70b-versatile',
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: user }
+          ],
+          temperature: 0.25,
+          max_tokens: 1800
+        })
+      });
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      return response.json();
+    }
+
+    async function generateParts(topic) {
+      const sys = "You generate educational parts lists. Output STRICT JSON only. No markdown. No extra keys.";
+      const lang = Language.current === 'ta' ? 'Tamil' : 'English';
+
+      const user = `Object/topic: "${topic}"
+Language: ${lang}
+Return STRICT JSON with this shape:
+{
+  "title": "string",
+  "parts": [
+    { "name": "string", "description": "string" }
+  ]
+}
+Rules:
+- 8 to 12 parts (if possible)
+- Each description 1–2 short sentences
+- Names must be student-friendly
+- No bullets, no numbering inside description
+- If topic is not a physical object, interpret as a concept and list major components/aspects
+`;
+
+      const data = await groqChatJSON(sys, user);
+      const raw = data?.choices?.[0]?.message?.content ?? '';
+      const text = stripCodeFences(raw);
+      const parsed = safeJsonParse(text);
+      if (!parsed || typeof parsed !== 'object') throw new Error('Model did not return valid JSON');
+      const parts = normalizeParts(parsed.parts);
+      if (parts.length === 0) throw new Error('No parts generated');
+      return { title: String(parsed.title ?? topic), parts };
+    }
+
     async function generateMermaidDiagram(topic, type) {
       const langInstruction = Language.current === 'ta'
         ? "எல்லா லேபல்களும் தமிழில் இருக்க வேண்டும். பொருத்தமான emoji பயன்படுத்தவும்."
@@ -353,51 +606,58 @@ Start directly with diagram keyword. No explanations, no markdown.`;
           max_tokens: 2200
         })
       });
-
       if (!response.ok) throw new Error(`API Error: ${response.status}`);
-
       const data = await response.json();
-      let code = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
-        ? data.choices[0].message.content.trim()
-        : "";
-
-      code = code.replace(/^```(?:mermaid)?\s*/i, '').replace(/```$/g, '').trim();
-
+      let code = String(data?.choices?.[0]?.message?.content ?? '').trim();
+      code = stripCodeFences(code);
       UI.codeEditor.value = code;
       await renderMermaid(code);
     }
 
+    // ============================================================================
+    // 7. Main action
+    // ============================================================================
     async function generateDiagram() {
       const apiKey = UI.groqKey.value.trim();
       const topic = UI.topicInput.value.trim();
       const type = getSelectedType();
 
       if (!apiKey) return Language.alert("API key required", "API கீ தேவை");
-      if (!topic) return Language.alert("Please enter a topic", "தயவு செய்து தலைப்பை உள்ளிடவும்");
+      if (!topic) return Language.alert("Please enter a topic/object", "தயவு செய்து ஒரு தலைப்பு/பொருளை உள்ளிடவும்");
       if (!type) return Language.alert("Please select a diagram type", "வரைபட வகையை தேர்வு செய்யவும்");
 
       localStorage.setItem('groqApiKey', apiKey);
+      currentDiagramType = type;
 
       showLoader(true);
       disableUI(true);
-      UI.codeEditor.value = '';
+      showPreviewLayout(false);
+      setDownloadEnabled(false);
       UI.mermaidDiv.innerHTML = '';
       UI.d3Div.innerHTML = '';
-      setDownloadEnabled(false);
-
-      currentDiagramType = type;
+      UI.partsDiv.innerHTML = '';
+      UI.codeEditor.value = '';
 
       try {
-        if (['infographic', 'pictograph', 'explodedview'].includes(type)) {
-          renderD3(topic, type, Language.current);
+        if (type === 'labeledParts') {
+          const { title, parts } = await generateParts(topic);
+          renderLabeledPartsSVG(title, parts);
+          renderPartsPanel(title, parts);
+
+          // click in list highlights diagram
+          UI.partsDiv.querySelectorAll('.part-item').forEach(el => {
+            el.addEventListener('click', () => highlightPart(Number(el.getAttribute('data-part-index'))));
+          });
+
+          showPreviewLayout(true);
+          UI.partsDiv.style.display = 'block';
+          setTimeout(() => highlightPart(0), 50);
         } else {
           await generateMermaidDiagram(topic, type);
         }
       } catch (err) {
         console.error(err);
-        UI.codeEditor.value = `Error: ${String(err && err.message ? err.message : err)}`;
-        Language.alert("Generation failed", "உருவாக்கம் தோல்வியடைந்தது");
-        setDownloadEnabled(false);
+        Language.alert("Generation failed. Check console.", "உருவாக்கம் தோல்வியடைந்தது. Console பார்க்கவும்.");
       } finally {
         showLoader(false);
         disableUI(false);
@@ -405,12 +665,12 @@ Start directly with diagram keyword. No explanations, no markdown.`;
     }
 
     // ============================================================================
-    // 6. Event Listeners
+    // 8. Actions: render / enlarge / download
     // ============================================================================
     UI.generateBtn.addEventListener('click', generateDiagram);
 
     UI.renderBtn.addEventListener('click', () => {
-      if (currentDiagramType && !['infographic','pictograph','explodedview'].includes(currentDiagramType)) {
+      if (currentDiagramType && currentDiagramType !== 'labeledParts') {
         renderMermaid(UI.codeEditor.value);
       }
     });
@@ -418,9 +678,7 @@ Start directly with diagram keyword. No explanations, no markdown.`;
     UI.enlargeBtn.addEventListener('click', () => {
       const container = UI.mermaidDiv.style.display !== 'none' ? UI.mermaidDiv : UI.d3Div;
       const svg = container.querySelector('svg');
-
-      if (!svg) return Language.alert("No diagram to enlarge", "பெரிதாக்குவதற்கு வரைபடம் இல்லை");
-
+      if (!svg) return Language.alert("No diagram to open", "திறக்க வரைபடம் இல்லை");
       const str = new XMLSerializer().serializeToString(svg);
       const blob = new Blob([str], { type: 'image/svg+xml' });
       window.open(URL.createObjectURL(blob), '_blank');
@@ -428,12 +686,10 @@ Start directly with diagram keyword. No explanations, no markdown.`;
 
     UI.downloadBtn.addEventListener('click', async () => {
       if (!hasAnySVG()) return Language.alert("No diagram to download", "பதிவிறக்க வரைபடம் இல்லை");
-
       const format = document.querySelector('input[name="exportFormat"]:checked')?.value || 'png';
-      const target = UI.previewArea;
 
       try {
-        const canvas = await html2canvas(target, { backgroundColor: '#ffffff', scale: 2 });
+        const canvas = await html2canvas(UI.previewArea, { backgroundColor: '#ffffff', scale: 2 });
         const imgData = canvas.toDataURL('image/png');
 
         if (format === 'png') {
@@ -446,13 +702,11 @@ Start directly with diagram keyword. No explanations, no markdown.`;
 
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
-
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
 
         const imgWidth = pageWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
         const y = Math.max(0, (pageHeight - imgHeight) / 2);
         pdf.addImage(imgData, 'PNG', 0, y, imgWidth, imgHeight);
         pdf.save('chartgen-pro.pdf');
@@ -468,3 +722,4 @@ Start directly with diagram keyword. No explanations, no markdown.`;
   </script>
 </body>
 </html>
+
