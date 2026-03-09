@@ -333,20 +333,16 @@
     // Labeled parts – D3 simple illustration
     // ───────────────────────────────────────────────
     async function renderLabeledParts(topic, parts) {
+    async function renderLabeledParts(topic, parts) {
     showLayout(true);
     showContainer('d3-container');
     UI.d3Div.innerHTML = '';
 
-    if (parts && parts.length >= 4) {
-        // உங்க original D3 custom diagram code இங்கே வச்சுக்கோங்க
-        // எ.கா: d3.select, svg.append எல்லாம்
-        // ... உங்க பழைய D3 logic முழுதும் ...
-        
-        enableDownload(true);
-    } else {
-        // fallback image search
-        UI.d3Div.innerHTML = '<div class="loader" style="margin:140px auto;"></div>';
+   if (parts && parts.length >= 4) {   // ← இதை comment பண்ணுங்க temporarily
+    //     // D3 code
+    // } else {
 
+    UI.d3Div.innerHTML = '<div class="loader" style="margin:140px auto;"></div>';
         const result = await getBestLabeledDiagramUrl(topic);
 
         if (result && result.url) {
@@ -547,19 +543,33 @@ Rules:
 - Student-friendly names
 - Short, clear descriptions`;
 
-      const raw = await callGroq(system, user);
-      const text = stripFences(raw);
-      let json;
-      try { json = JSON.parse(text); } catch { throw new Error("Invalid JSON from model"); }
+  
 
-      const parts = (json.parts || []).map(p => ({
+    const raw = await callGroq(system, user);
+    let text = stripFences(raw);
+
+    // Extra cleaning for common AI mistakes
+    text = text.replace(/```json
+    text = text.replace(/^[\s\S]*?\{/, '{');  // remove anything before first {
+    text = text.replace(/\}[^\}]*$/, '}');   // remove after last }
+
+    let json;
+    try {
+        json = JSON.parse(text);
+    } catch (e) {
+        console.error("JSON parse failed. Raw text:", text);
+        throw new Error("Invalid JSON from model - check console for raw response");
+    }
+
+    const parts = (json.parts || []).map(p => ({
         name: String(p.name || '').trim(),
         description: String(p.description || '').trim()
-      })).filter(p => p.name);
+    })).filter(p => p.name);
 
-      if (parts.length === 0) throw new Error("No parts generated");
+    if (parts.length === 0) throw new Error("No parts generated");
 
-      return { title: json.title || topic, parts };
+    return { title: json.title || topic, parts };
+}
     }
 
     async function generateMermaid(topic, type) {
