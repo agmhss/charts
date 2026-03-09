@@ -332,84 +332,50 @@
     // ───────────────────────────────────────────────
     // Labeled parts – D3 simple illustration
     // ───────────────────────────────────────────────
-    function renderLabeledParts(topic, parts) {
-      showLayout(true);
-      showContainer('d3-container');
-      UI.d3Div.innerHTML = '';
+    async function renderLabeledParts(topic, parts) {
+    showLayout(true);
+    showContainer('d3-container');
+    UI.d3Div.innerHTML = '';
 
-      const w = 860, h = 520;
-      const cx = w * 0.44, cy = h * 0.52;
+    if (parts && parts.length >= 4) {
+        // உங்க original D3 custom diagram code இங்கே வச்சுக்கோங்க
+        // எ.கா: d3.select, svg.append எல்லாம்
+        // ... உங்க பழைய D3 logic முழுதும் ...
+        
+        enableDownload(true);
+    } else {
+        // fallback image search
+        UI.d3Div.innerHTML = '<div class="loader" style="margin:140px auto;"></div>';
 
-      const svg = d3.select(UI.d3Div)
-        .append('svg')
-        .attr('width', '100%')
-        .attr('height', h)
-        .attr('viewBox', `0 0 ${w} ${h}`)
-        .attr('style', 'max-width:100%;height:auto;display:block;');
+        const result = await getBestLabeledDiagramUrl(topic);
 
-      svg.append('text')
-        .attr('x', 20).attr('y', 40)
-        .attr('font-size', 22).attr('font-weight', 900)
-        .attr('fill', '#0f172a')
-        .text(topic);
+        if (result && result.url) {
+            const isTamilDiagram = result.language === 'ta';
+            const langNote = isTamilDiagram 
+                ? 'தமிழ் லேபிள்களுடன்' 
+                : 'ஆங்கில லேபிள்களுடன் (தெளிவான வரைபடம்)';
 
-      // Simple blob shape
-      svg.append('ellipse')
-        .attr('cx', cx).attr('cy', cy)
-        .attr('rx', 220).attr('ry', 160)
-        .attr('fill', '#bfdbfe').attr('opacity', 0.7);
-
-      const anchors = parts.slice(0, 10).map((_, i) => {
-        const angle = (i / Math.max(1, parts.length - 1)) * Math.PI * 2;
-        return {
-          x: cx + Math.cos(angle) * 180,
-          y: cy + Math.sin(angle) * 140,
-          lx: i % 2 ? w - 140 : 60,
-          ly: 80 + i * 40,
-          i
-        };
-      });
-
-      const g = svg.append('g');
-
-      g.selectAll('line')
-        .data(anchors)
-        .join('line')
-        .attr('x1', d => d.x).attr('y1', d => d.y)
-        .attr('x2', d => d.lx).attr('y2', d => d.ly)
-        .attr('stroke', '#64748b').attr('stroke-width', 1.5);
-
-      g.selectAll('circle')
-        .data(anchors)
-        .join('circle')
-        .attr('cx', d => d.x).attr('cy', d => d.y)
-        .attr('r', 8).attr('fill', '#3b82f6');
-
-      const labelG = g.selectAll('g')
-        .data(anchors)
-        .join('g')
-        .attr('transform', d => `translate(${d.lx},${d.ly})`)
-        .style('cursor', 'pointer')
-        .on('click', (_, d) => highlightPart(d.i));
-
-      labelG.append('circle')
-        .attr('r', 16).attr('fill', '#dbeafe').attr('stroke', '#93c5fd');
-
-      labelG.append('text')
-        .attr('y', 6).attr('text-anchor', 'middle')
-        .attr('font-weight', 900).attr('fill', '#1e40af')
-        .text(d => d.i + 1);
-
-      labelG.append('text')
-        .attr('x', 28).attr('y', 6)
-        .attr('text-anchor', 'start')
-        .attr('font-size', 13).attr('fill', '#0f172a')
-        .text(d => parts[d.i].name.slice(0, 22));
-
-      UI.d3Div.__anchors = anchors;
-      UI.d3Div.__svg = svg;
-      enableDownload(true);
+            UI.d3Div.innerHTML = `
+                <div style="text-align:center; padding:16px;">
+                    <img src="${result.url}" 
+                         alt="${topic} வரைபடம்" 
+                         style="max-width:100%; max-height:520px; object-fit:contain; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.08); background:white;">
+                    <div style="margin-top:12px; font-size:0.95rem; color:#374151;">
+                        ${topic} — ${langNote}<br>
+                        <small style="color:#6b7280;">Wikimedia Commons-இலிருந்து தானாக தேர்ந்தெடுக்கப்பட்டது</small>
+                    </div>
+                </div>`;
+            enableDownload(true);
+        } else {
+            UI.d3Div.innerHTML = `
+                <div style="padding:80px 20px; text-align:center; color:#6b7280; background:#f1f5f9; border-radius:12px;">
+                    <div style="font-size:1.1rem; margin-bottom:8px;">வரைபடம் கண்டுபிடிக்க முடியவில்லை 😔</div>
+                    <p>"${escapeHtml(topic)}" க்கு ஏற்ற labeled வரைபடம் தற்போது கிடைக்கவில்லை.</p>
+                    <small>வேறொரு தலைப்பை முயற்சிக்கவும் அல்லது Groq API-ஐ சரிபார்க்கவும்.</small>
+                </div>`;
+        }
     }
+}
 
     function highlightPart(idx) {
       const anchors = UI.d3Div.__anchors || [];
@@ -452,7 +418,89 @@
         el.addEventListener('click', () => highlightPart(Number(el.dataset.idx)));
       });
     }
+async function getBestLabeledDiagramUrl(topic) {
+    const isTamil = Language.current === 'ta';
+    
+    // மொழிக்கு ஏற்ற primary queries (நல்ல quality-க்கு optimized)
+    let primaryQueries = isTamil ? [
+        `${topic} தமிழ் லேபிள் வரைபடம் svg`,
+        `${topic} தமிழ் labeled diagram`,
+        `${topic} தமிழில் வரைபடம் schematic`,
+        `${topic} தமிழ் அறிவியல் வரைபடம்`,
+        `${topic} தமிழ் லேபிள்கள் உடன்`
+    ] : [
+        `${topic} labeled diagram svg`,
+        `${topic} labelled anatomy diagram`,
+        `${topic} cross section labeled diagram`,
+        `${topic} schematic diagram labelled`,
+        `${topic} educational labeled diagram wikimedia`
+    ];
 
+    // fallback queries (மற்ற மொழி)
+    let fallbackQueries = isTamil ? [
+        `${topic} labeled diagram svg`,
+        `${topic} labelled anatomy diagram`,
+        `${topic} cross section labeled diagram`
+    ] : [
+        `${topic} தமிழ் லேபிள் வரைபடம்`,
+        `${topic} தமிழ் வரைபடம் svg`
+    ];
+
+    const allQueries = [...primaryQueries, ...fallbackQueries];
+
+    for (let query of allQueries) {
+        try {
+            const searchUrl = `https://commons.wikimedia.org/w/api.php?` +
+                `action=query&` +
+                `generator=search&` +
+                `gsrsearch=${encodeURIComponent(query)}&` +
+                `gsrlimit=6&` +
+                `gsrnamespace=6&` +          // File namespace
+                `prop=imageinfo&` +
+                `iiprop=url|size|mime&` +    // mime type-ஐ check பண்ணலாம்
+                `format=json&` +
+                `origin=*`;
+
+            const response = await fetch(searchUrl);
+            if (!response.ok) continue;
+
+            const data = await response.json();
+            if (!data.query?.pages) continue;
+
+            const pages = Object.values(data.query.pages);
+
+            for (let page of pages) {
+                const info = page.imageinfo?.[0];
+                if (!info) continue;
+
+                const url = info.url;
+                const mime = info.mime || '';
+
+                // SVG மட்டும் + reasonable size
+                if (url && mime === 'image/svg+xml' && info.size > 5000) {
+                    return {
+                        url: url,
+                        language: query.includes('தமிழ்') || query.includes('tamil') ? 'ta' : 'en',
+                        queryUsed: query
+                    };
+                }
+
+                // SVG இல்லைனாலும் PNG/JPG ஆனாலும் acceptable ஆனா quality இருந்தா
+                if (url && (mime.startsWith('image/')) && info.width > 400 && info.height > 300) {
+                    return {
+                        url: url,
+                        language: query.includes('தமிழ்') || query.includes('tamil') ? 'ta' : 'en',
+                        queryUsed: query
+                    };
+                }
+            }
+        } catch (err) {
+            console.warn(`Query failed: ${query}`, err);
+        }
+    }
+
+    return null;
+}
     // ───────────────────────────────────────────────
     // Groq helpers
     // ───────────────────────────────────────────────
