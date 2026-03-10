@@ -533,10 +533,14 @@ Rules: 7–12 parts, student-friendly, short descriptions.`;
         ? "All labels in Tamil. Use simple Tamil words for school students."
         : "All labels in English. Clear educational language.";
 
-      const prompt = `Create ONLY valid Mermaid ${type} code for "${topic}".
+      const prompt = `Create ONLY valid Mermaid mindmap code about "${topic}".
 ${langInst}
-Start with diagram keyword (graph TD, mindmap, etc.).
-No explanations, no fences.`;
+Start with 'mindmap'
+Root node must be root((Main Idea))
+Use indentation (2 spaces) for hierarchy
+No arrows --> or connections needed
+Use ["text"] for labels with spaces/special chars
+No explanations, no code fences.`;
 
       let code = await callGroq("Mermaid expert. Output valid code only.", prompt);
       code = stripFences(code).replace(/^mermaid\s*/i, '').trim();
